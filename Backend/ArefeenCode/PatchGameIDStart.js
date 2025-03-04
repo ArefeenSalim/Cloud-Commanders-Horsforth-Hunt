@@ -1,73 +1,36 @@
-// PatchGameIDStart.js
+const fetch = require('node-fetch');  // You may need to install node-fetch if you haven't
 
-const express = require('express');
-const router = express.Router();
-
-// Example in-memory store for games
-let games = [
-  {
-    gameId: 101,
-    state: 'lobby',
-    players: [
-      { playerID: 1, role: 'fugitive' },
-      { playerID: 2, role: 'detective' },
-      { playerID: 3, role: 'detective' }
-    ]
-  },
-  // Other game data
-];
-
-// Helper function to check if game has enough players
-function hasEnoughPlayers(game) {
-  const fugitives = game.players.filter(player => player.role === 'fugitive');
-  const detectives = game.players.filter(player => player.role === 'detective');
-  return fugitives.length >= 1 && detectives.length >= 2;
-}
-
-// Route for starting the game
-router.patch('/games/:gameId/start/:playerID', (req, res) => {
-  const { gameId, playerID } = req.params;
-  const game = games.find(game => game.gameId == gameId);
+const startGame = async (gameId, playerId, token) => {
+  const url = `http://trinity-developments.co.uk/games/${gameId}/start/${playerId}`;
   
-  // Check if game exists
-  if (!game) {
-    return res.status(404).json({
-      message: `Game with ID ${gameId} not found`
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'PATCH',
+      headers: headers,
     });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log('Game Started:', data.message);
+      console.log('Game ID:', data.gameId);
+      console.log('Game State:', data.state);
+    } else {
+      throw new Error(data.message || 'Something went wrong');
+    }
+  } catch (error) {
+    console.error('Error starting game:', error);
   }
+};
 
-  // Check if the game is in a valid state to start
-  if (game.state !== 'lobby') {
-    return res.status(400).json({
-      message: `Game with ID ${gameId} does not have an open lobby`
-    });
-  }
+// Example usage:
+const gameId = 'yourGameId';  // Replace with actual game ID
+const playerId = 'yourPlayerId';  // Replace with the player ID trying to start the game
+const token = 'yourAccessToken';  // Replace with actual access token
 
-  // Check if there are enough players to start
-  if (!hasEnoughPlayers(game)) {
-    return res.status(400).json({
-      message: `Game with ID ${gameId} does not have enough players to start`
-    });
-  }
-
-  // Check if player is in the game
-  const playerInGame = game.players.some(player => player.playerID == playerID);
-  if (!playerInGame) {
-    return res.status(403).json({
-      message: `You are not authorised to start the Game with ID ${gameId}`
-    });
-  }
-
-  // Change game state to "fugitive" and start the game
-  game.state = 'fugitive';
-
-  res.status(200).json({
-    message: "Lobby closed, Game started",
-    gameId: game.gameId,
-    state: game.state
-  });
-});
-
-module.exports = router;
-
-
+startGame(gameId, playerId, token);
