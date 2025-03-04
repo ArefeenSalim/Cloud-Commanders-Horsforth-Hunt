@@ -29,14 +29,14 @@ const styles = StyleSheet.create({
     textBox: {
         position: 'absolute',
         backgroundColor: '#DDDD91',
-        marginBottom: '100px',
-        width: '300px',
-        height: '90px',
-        fontSize: '30px',
+        marginBottom: 100,
+        width: 300,
+        height: 90,
+        fontSize: 30,
     },
 
     userText: {
-        marginTop: '230px',
+        marginTop: 230,
         fontSize: 36,
         fontStyle: 'bold',
         color: '#DDDD91',
@@ -48,16 +48,16 @@ const styles = StyleSheet.create({
         paddingHorizontal: 40,
         borderRadius: 10,
         paddingTop: 30,
-        width: '210px',
-        height: '150px',
+        width: 210,
+        height: 150,
         borderRadius: '50%',
-        marginBottom: '150px',
-        marginTop: '290px',
+        marginBottom: 150,
+        marginTop: 290,
     },
     
     submitButtonText: {
-        fontSize: '30px',
-        marginTop: '20px',
-        marginLeft: '16px',
+        fontSize: 30,
+        marginTop: 20,
+        marginLeft: 16,
     }
 })

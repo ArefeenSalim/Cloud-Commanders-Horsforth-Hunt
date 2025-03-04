@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native'
-import { useRouter } from "expo-router";
+import { useRouter, Link } from "expo-router";
 import React, { useState } from 'react'; 
 
 
@@ -16,9 +16,9 @@ export default function LobbyCodePage() {
     
     <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
       <Text style={styles.lobbyText}>Enter Your Lobby Code Here:</Text>
-      <TouchableOpacity href="/username_page" style={styles.JoinButton}>
+      <Link href="/username_page" style={styles.JoinButton}>
       <Text style={styles.joinButtonText}>Join Game</Text>
-      </TouchableOpacity>
+      </Link>
     <TextInput
       style={styles.textBox}
       placeholder=""
@@ -35,20 +35,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#DDDD91',
     paddingVertical: 15,
     paddingHorizontal: 40,
-    borderRadius: 10,
     paddingTop: 30,
-    width: '210px',
-    height: '150px',
-    borderRadius: '50%',
+    width: 210,
+    height: 150,
+    borderRadius: 50,
     
   },
   joinButtonText: {
-    fontSize: '26px',
-    marginTop: '20px',
-    marginLeft: '4px',
+    fontSize: 26,
+    marginTop: 20,
+    marginLeft: 4,
   },
   lobbyText: {
-    marginBottom: '250px',
+    marginBottom: 250,
     fontSize: 30,
     fontStyle: 'bold',
     color: '#DDDD91',
@@ -56,10 +55,10 @@ const styles = StyleSheet.create({
   textBox: {
     position: 'absolute',
     backgroundColor: '#DDDD91',
-    marginBottom: '100px',
-    width: '300px',
-    height: '90px',
-    fontSize: '30px',
+    marginBottom: 100,
+    width: 300,
+    height: 90,
+    fontSize: 30,
   }
 })
 

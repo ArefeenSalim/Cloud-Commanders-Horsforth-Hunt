@@ -1,42 +1,31 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
-import { Link } from 'expo-router'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native'
 import React, { useState} from 'react'
+import { useRouter } from "expo-router";
+import { Link } from 'expo-router'
+
+const router = useRouter(); // Get router instance
 
 
-// JoinButton Component
-const JoinButton = () => {
-    return (
-      <TouchableOpacity style={styles.joinButton}>
-        <Text style={styles.joinButtonText}>Join Game</Text>
-      </TouchableOpacity>
-    );
-  };
-  
-  // CreateButton Component
-  const CreateButton = () => {
-    return (
-      <TouchableOpacity style={styles.createButton} onPress={() => setCurrentPage('lobby_code_page.jsx')}>
+export default function index() {
+  return (
+    <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
+    <><TouchableOpacity style={styles.joinButton}>
+      <Text style={styles.joinButtonText}>Join Game</Text>
+    </TouchableOpacity>
+    <Link href="/lobby_code_page" style={styles.createButton}>
         <Text style={styles.createButtonText}>Create Game</Text>
-      </TouchableOpacity>
-    );
-  };
-  
-  // App Component
-  const app = () => {
-    return (
-      <View style={styles.container}>
-        <JoinButton />
-        <CreateButton />
-      </View>
-    );
-  };
-  const [currentPage, setCurrentPage] = useState('lobby_code_page')
+    </Link></>
+    </View>
+  )
+}
 
-export default app
+  
+
+
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'black',
+    backgroundColor: 'light gray',
     width: '60%',
     margin: 'auto',
   },
@@ -46,6 +35,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     borderRadius: 10,
     paddingTop: 30,
+    marginBottom: '100px',
   },
   joinButtonText: {
     color: 'black',
@@ -60,14 +50,19 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 10,
-    marginTop: 120,
     paddingTop: 30,
+    
   },
   createButtonText: {
     color: 'black',
     fontSize: 28,
     textAlign: 'center',
     fontWeight: 'bold',
+  },
+  textBox: {
+    backgroundColor: 'red',
+    length: '500px',
+    width: '200px',
   },
   
 })
