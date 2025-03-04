@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "react-native": "^0.78.0",
-    "xhr2": "^0.2.1",
-    "xmlhttprequest": "^1.8.0"
-  }
-}

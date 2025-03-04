@@ -13,7 +13,7 @@ export default function LobbyCodePage() {
   return (
     
     <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
-      <Text style={styles.lobbyText}>Enter Your Lobby Code Here:</Text>
+      <Text style={styles.lobbyText}>Enter Lobby ID Here:</Text>
       <Link href="/username_page" style={styles.JoinButton}>
       <Text style={styles.joinButtonText}>Join Game</Text>
       </Link>
