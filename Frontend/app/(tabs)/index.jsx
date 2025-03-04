@@ -9,10 +9,10 @@ const router = useRouter(); // Get router instance
 export default function index() {
   return (
     <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
-    <><TouchableOpacity style={styles.joinButton}>
+    <><Link href="/lobby_code_page" style={styles.joinButton}>
       <Text style={styles.joinButtonText}>Join Game</Text>
-    </TouchableOpacity>
-    <Link href="/lobby_code_page" style={styles.createButton}>
+    </Link>
+    <Link href="/lobby_create_page" style={styles.createButton}>
         <Text style={styles.createButtonText}>Create Game</Text>
     </Link></>
     </View>

@@ -6,6 +6,7 @@ const router = useRouter(); // Get router instance
 const [text, setText] = useState('');
 
 export default function UsernamePage() {
+    const [text, setText] = useState('');
     return (
         <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
             <Text style={styles.userText}>Enter Your username:</Text>
