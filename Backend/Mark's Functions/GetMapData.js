@@ -10,7 +10,7 @@ function GetMapData(mapID) {
 
     // Making our connection 
     let mapIDString = mapID.toString();
-    let url = 'http://trinity-developments.co.uk/games/' + mapIDString;
+    let url = 'http://trinity-developments.co.uk/maps/' + mapIDString;
     //let url = baseUrl.concat("", mapIDString);
     xhr.open("GET", url, true);
 
@@ -23,7 +23,7 @@ function GetMapData(mapID) {
             console.log(this.responseText);
             mapData = JSON.parse(this.responseText);
             return mapData;
-        }
+        } 
     }
 
     // If map data was successfully acquired, then it shall return said map data as an object, otherwise it shall return null after a period of time.
@@ -57,4 +57,4 @@ function GetMapData(mapID) {
     */
     
 }
-GetMapData(0);
+GetMapData(1);
