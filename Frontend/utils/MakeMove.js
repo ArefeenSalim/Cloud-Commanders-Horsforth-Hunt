@@ -30,15 +30,9 @@ export function MakeMove(playerID, gameID, ticket, destination) {
     .then(data => {
         console.log(data);
         responseData = data;
-        // You can return the responseData here if you need to use it
         return responseData;
     })
     .catch(error => {
         console.error("Error:", error);
     });
-
-    // If map data was successfully acquired, then it shall return said map data as an object, otherwise it shall return null after a period of time.
-    setTimeout(function(){
-        return responseData;
-    }, 5000);
 }

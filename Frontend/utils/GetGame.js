@@ -4,7 +4,7 @@
 const BASE_URL = 'http://trinity-developments.co.uk'; // Your actual API URL
 
 // Function to fetch the list of open games
-const getOpenGames = async () => {
+export const getOpenGames = async () => {
   try {
     // Make the GET request to the '/games' endpoint using fetch
     const response = await fetch(`${BASE_URL}/games`);
@@ -38,6 +38,7 @@ const getOpenGames = async () => {
         });
         console.log('----------------------------');
       });
+      return JSON.parse(data);
     } else {
       console.log('No open games found.');
     }

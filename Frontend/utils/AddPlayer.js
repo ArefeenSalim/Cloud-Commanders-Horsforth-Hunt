@@ -1,4 +1,5 @@
 export async function AddPlayer(playerName, gameID) {
+
     // Create Send Object & convert it to JSON
     const sendObj = { playerName: playerName };
     const sendJSON = JSON.stringify(sendObj);
@@ -20,11 +21,16 @@ export async function AddPlayer(playerName, gameID) {
         }
 
         const data = await response.json();
+
+        //For Testing response body
+
+
         return data;
     } catch (error) {
         console.error("Error adding player:", error);
         throw error; // Re-throw so caller can handle it
     }
+}
 
     /*
     Response should have the following Attributes's
@@ -54,15 +60,10 @@ export async function AddPlayer(playerName, gameID) {
     Fugitive}”
     }
     */
-}
 
-// Example call - For some reason the request body is sent twice, dunno why, but it'll create two players but only get one of the player's data back
+// Example call
 
-AddPlayerPromise("JonathanDoe", 55)
+var returnData = AddPlayer("PapaJohn", 67)
     .then(response => console.log(response))
     .catch(error => console.error(error));
-input = input+1
-console.log(input)
-
-
 

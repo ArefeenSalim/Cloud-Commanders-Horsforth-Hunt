@@ -10,14 +10,13 @@ class KickPlayerResponse {
     }
 }
 
-export async function kickPlayerDetail(playerId, accessToken) {
+export async function kickPlayerDetail(playerId) {
     const url = `https://example.com/players/${playerId}`; // Replace with actual API URL
     
     try {
         const response = await fetch(url, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${accessToken}`,
                 'Content-Type': 'application/json'
             }
         });

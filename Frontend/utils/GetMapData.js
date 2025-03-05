@@ -24,7 +24,6 @@ export function GetMapData(mapID) {
     .then(data => {
         console.log(data);
         mapData = data;
-        // You can return the mapData here if you need to use it
         return mapData;
     })
     .catch(error => {

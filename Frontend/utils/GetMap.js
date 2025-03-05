@@ -2,7 +2,7 @@
 const baseUrl = "http://trinity-developments.co.uk"; // Change this if needed
 
 // Asynchronous function to fetch map data
-async function getMaps() {
+export async function getMaps() {
   try {
     // Send a GET request to the /maps endpoint
     const response = await fetch(`${baseUrl}/maps`);
@@ -17,6 +17,8 @@ async function getMaps() {
 
     // Log the fetched data to the console (can be replaced with logic to display it on the UI)
     console.log("Maps Data:", data);
+
+    return data;
 
   } catch (error) {
     // If any error occurs during the fetch, log the error message

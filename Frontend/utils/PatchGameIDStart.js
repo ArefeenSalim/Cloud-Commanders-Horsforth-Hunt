@@ -1,4 +1,4 @@
-const startGame = async (gameId, playerId) => {
+export const startGame = async (gameId, playerId) => {
   const url = `http://trinity-developments.co.uk/games/${gameId}/start/${playerId}`;
   
   const headers = {
@@ -27,8 +27,8 @@ const startGame = async (gameId, playerId) => {
 };
 
 // Example usage:
-const gameId = '40';  // Replace with actual game ID
-const playerId = '82';  // Replace with the player ID trying to start the game
+const gameId = '19';  // Replace with actual game ID
+const playerId = '107';  // Replace with the player ID trying to start the game
 // const token = 'yourAccessToken';  // Replace with actual access token
 
 startGame(gameId, playerId);
