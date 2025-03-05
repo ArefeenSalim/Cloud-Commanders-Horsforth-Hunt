@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { AddPlayer } from '../../utils/API Functions/AddPlayer';
 import { CreateGame } from '../../utils/API Functions/CreateGame';
 import { setItem, getItem } from '../../utils/AsyncStorage'
+import { Link } from 'expo-router'
 
 const router = useRouter(); // Get router instance
 const [text, setText] = useState('');
@@ -68,7 +69,7 @@ export default function UsernamePage() {
             <Text style={styles.userText}>Enter Your username:</Text>
             <TouchableOpacity onPress={() => InitLobby(text)} style={styles.submitButton}>
             <Text style={styles.submitButtonText}>Submit</Text>
-            </TouchableOpacity>
+            </Link>
             <TextInput
             style={styles.textBox}
             placeholder=""

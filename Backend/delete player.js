@@ -1,44 +1,41 @@
-// Class representing the response for kicking a player
-class KickPlayerResponse {
+gclass KickPlayerResponse {
     constructor(message, gameId, playerId) {
-        this.message = message;  // Message from the server response
-        this.gameId = gameId;    // Game ID associated with the player
-        this.playerId = playerId; // ID of the player who was kicked
+        this.message = message;
+        this.gameId = gameId;
+        this.playerId = playerId;
     }
 
-    // Method to convert the object into a readable string format
     toString() {
         return `KickPlayerResponse(message='${this.message}', gameId=${this.gameId}, playerId=${this.playerId})`;
     }
 }
 
-// Function to kick a player from the game using a DELETE request
-function kickPlayerDetail(playerId, accessToken) {
+async function kickPlayerDetail(playerId, accessToken) {
     const url = `https://example.com/players/${playerId}`; // Replace with actual API URL
-
-    return fetch(url, {
-        method: 'DELETE', // HTTP DELETE method to remove the player
-        headers: {
-            'Authorization': `Bearer ${accessToken}`, // Authorization token
-            'Content-Type': 'application/json' // Content type set to JSON
+    
+    try {
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            return new KickPlayerResponse(
+                data.message || '',
+                data.gameId || null,
+                data.playerId || null
+            );
+        } else {
+            throw new Error(`Error: ${response.status} - ${await response.text()}`);
         }
-    })
-    .then(response => {
-        if (!response.ok) { 
-            // If the response is not OK (e.g., 404, 500), read error message
-            return response.text().then(text => {
-                throw new Error(`Error: ${response.status} - ${text}`);
-            });
-        }
-        return response.json(); // Parse JSON response if successful
-    })
-    .then(data => new KickPlayerResponse(
-        data.message || '', // Message from server response (fallback to empty string if missing)
-        data.gameId || null, // Game ID from response (fallback to null if missing)
-        data.playerId || null // Player ID from response (fallback to null if missing)
-    ))
-    .catch(error => error.message); // Catch and return any errors as a message string
+    } catch (error) {
+        return error.message;
+    }
 }
 
 // Example Usage:
-kickPlayerDetail(201, "your_access_token_here").then(console.log);
+// kickPlayerDetail(201, "your_access_token_here").then(console.log).catch(console.error);
