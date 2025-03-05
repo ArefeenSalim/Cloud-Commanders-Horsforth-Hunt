@@ -1,16 +1,72 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native'
 import { useRouter } from "expo-router";
 import React, { useState } from 'react';
+import { AddPlayer } from '../../utils/API Functions/AddPlayer';
+import { CreateGame } from '../../utils/API Functions/CreateGame';
+import { setItem, getItem } from '../../utils/AsyncStorage'
 
 const router = useRouter(); // Get router instance
 const [text, setText] = useState('');
 
 export default function UsernamePage() {
     const [text, setText] = useState('');
+    const mapNumb = 1;
+    let returnData;
+
+    const InitLobby = async (username) => {
+        console.log("InitLobby Triggered")
+        const isHost = await getItem('isHost')
+        if (username === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
+            Alert.alert('Error', 'Input Username');
+            return;
+        } else if (username != null || username != undefined || await getItem('isHost')) {
+                  try {
+                  const result = await CreateGame(await getItem('lobbyName'), mapNumb, 'short')
+            
+                  if (result.success) {
+                      console.log('JSON Data:', result.data);
+                      returnData = result.data;
+                      console.log(returnData.gameId);
+            
+                      await setItem('localGameID', returnData.gameId);
+                  } else {
+                      console.error('Error:', result.error)
+                      Alert.alert('Error', result.error)
+                      return;
+                  }
+                  } catch (error) {
+                    console.error("Error in create Lobby:", error);
+                    return;
+                  }
+        } 
+        try {
+            const addResult = await AddPlayer(username, await getItem('localGameID'))
+
+            if (addResult.success) {
+                console.log('JSON Data:', addResult.data);
+                returnData = addResult.data;
+                console.log(returnData.gameId);
+      
+                await setItem('localPlayerId', returnData.playerId);
+                
+                router.navigate('/lobby');
+            } else {
+                console.error('Error:', addResult.error)
+                Alert.alert('Error', addResult.error)
+                return;
+            } 
+        } catch (error) {
+            console.error("Error in join lobby:", error);
+            return;
+        }
+
+    }
+
+
     return (
         <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
             <Text style={styles.userText}>Enter Your username:</Text>
-            <TouchableOpacity href="/lobby_code_page" style={styles.submitButton}>
+            <TouchableOpacity onPress={() => InitLobby(text)} style={styles.submitButton}>
             <Text style={styles.submitButtonText}>Submit</Text>
             </TouchableOpacity>
             <TextInput

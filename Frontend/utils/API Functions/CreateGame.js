@@ -49,16 +49,16 @@ export async function CreateGame(gameName, mapID, gameLength) {
         }
     */
 
-await CreateGame("Cloud Commanders Test Success", 1, "Short")
-    .then((result) => {
-        if (result.success) {
-            console.log('JSON Data:', result.data);
-            const returnData = result.data;
-            console.log(returnData);
-        } else {
-            console.error('Error:', result.error)
-        }
-    });
+// await CreateGame("Cloud Commanders Test Success", 1, "Short")
+//     .then((result) => {
+//         if (result.success) {
+//             console.log('JSON Data:', result.data);
+//             const returnData = result.data;
+//             console.log(returnData);
+//         } else {
+//             console.error('Error:', result.error)
+//         }
+//     });
 
 
 
