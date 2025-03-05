@@ -13,10 +13,11 @@ export default function index() {
       <Image
        source={require('../../assets/images/logo.jpg')}
        style={{
-         width: 100,
-         height: 100,
-         borderWidth: 2,
-         borderColor: 'white',
+         width: 300,
+         position: 'absolute',
+         height: 300,
+         backgroundColor: 'transparent',
+         marginBottom: 500,
        }}
        />
 
@@ -46,7 +47,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     borderRadius: 10,
     paddingTop: 30,
-    marginBottom: '100px',
+    marginTop: '100px',
   },
   joinButtonText: {
     color: 'black',
@@ -57,11 +58,13 @@ const styles = StyleSheet.create({
 
   },
   createButton: {
+    position: 'absolute',
     backgroundColor: '#DDDD91',
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 10,
     paddingTop: 30,
+    marginTop: 400,
     
   },
   createButtonText: {
