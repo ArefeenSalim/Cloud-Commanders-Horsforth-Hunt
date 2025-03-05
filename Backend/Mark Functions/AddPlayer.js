@@ -70,4 +70,4 @@ function AddPlayer(playerName, gameID) {
     */
     
 }
-AddPlayer("Mark", 0);
+AddPlayer("Mark", 42);
