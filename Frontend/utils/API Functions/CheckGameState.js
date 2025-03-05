@@ -28,41 +28,35 @@ function checkGameState(response) {
     }
 }
 
-// Example usage: Creating a mock response class
-class MockResponse {
-    /**
-     * Mocks a server response containing JSON data about the game state.
-     * 
-     * @return {Object} - The mock game state data.
-     */
-    json() {
-        return {
-            gameId: 101, // Unique identifier for the game
-            mapId: 1, // Identifier for the game map
-            state: "detective", // Current game state
-            winner: "none", // Indicates if there's a winner
-            round: 5, // Current round number
-            length: 24, // Total number of rounds in the game
-            players: [ // Array of players in the game
-                {
-                    playerId: 201,
-                    playerName: "Dr Nick",
-                    colour: "Clear",
-                    Location: "3"
-                },
-                {
-                    playerId: 204,
-                    playerName: "ADSA",
-                    colour: "Red",
-                    Location: "60"
-                }
-            ]
-        };
-    }
+export async function GetGameState(gameID) {
+    
+        // Construct the URL
+        const gameIDString = gameID.toString();
+        const url = `http://trinity-developments.co.uk/games/${gameIDString}`;
+    
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+    
+            // Ensure we return and handle the response properly
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            const data = await response.json();    
+            return { success: true, data };
+        } catch (error) {
+            console.error("Error getting game state:", error);
+            return { success: false, error: error}
+        }
 }
 
-// Mocking a server response for demonstration:
-const mockResponse = new MockResponse(); // Create an instance of the mock response
-const gameState = checkGameState(mockResponse); // Call the function with the mock response
+// Testing API Function
+const gameState = await GetGameState(51); // Call the function with the mock response
 
 console.log("\nReturned Game State Object:", gameState); // Log the returned game state object
+
+console.log(gameState.gameId);
+console.log(gameState.players[0].playerName);

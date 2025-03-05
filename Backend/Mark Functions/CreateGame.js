@@ -42,7 +42,7 @@ function CreateGame(gameName, mapID, gameLength) {
     }, 5000)
 
     /*
-        Response should have the following Attributes's
+        Response should have the following Attributes
         message: String ("Game Created")
         gameId: Int 
         name: String

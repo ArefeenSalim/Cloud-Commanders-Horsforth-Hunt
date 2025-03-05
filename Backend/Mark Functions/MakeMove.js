@@ -1,6 +1,6 @@
 // Function used to create a lobby for players to join onto.
 
-function MakeMove(accessToken, playerID, gameID, ticket, destination) {
+function MakeMove(playerID, gameID, ticket, destination) {
 
     // Creating variable for the response body
     var responseData = null
