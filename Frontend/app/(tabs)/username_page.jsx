@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native'
 import { useRouter } from "expo-router";
 import React, { useState } from 'react';
+import { Link } from 'expo-router'
 
 const router = useRouter(); // Get router instance
 const [text, setText] = useState('');
@@ -10,9 +11,9 @@ export default function UsernamePage() {
     return (
         <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
             <Text style={styles.userText}>Enter Your username:</Text>
-            <TouchableOpacity href="/lobby_code_page" style={styles.submitButton}>
+            <Link href="/start_game_page" style={styles.submitButton}>
             <Text style={styles.submitButtonText}>Submit</Text>
-            </TouchableOpacity>
+            </Link>
             <TextInput
             style={styles.textBox}
             placeholder=""

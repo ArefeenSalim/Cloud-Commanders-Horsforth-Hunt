@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-nativ
 import React, { useState} from 'react'
 import { useRouter } from "expo-router";
 import { Link } from 'expo-router'
+import { Image } from 'react-native';
 
 const router = useRouter(); // Get router instance
 
@@ -9,6 +10,16 @@ const router = useRouter(); // Get router instance
 export default function index() {
   return (
     <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
+      <Image
+       source={require('../../assets/images/logo.jpg')}
+       style={{
+         width: 100,
+         height: 100,
+         borderWidth: 2,
+         borderColor: 'white',
+       }}
+       />
+
     <><Link href="/lobby_code_page" style={styles.joinButton}>
       <Text style={styles.joinButtonText}>Join Game</Text>
     </Link>
