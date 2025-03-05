@@ -69,7 +69,7 @@ export default function UsernamePage() {
             <Text style={styles.userText}>Enter Your username:</Text>
             <TouchableOpacity onPress={() => InitLobby(text)} style={styles.submitButton}>
             <Text style={styles.submitButtonText}>Submit</Text>
-            </Link>
+            </TouchableOpacity>
             <TextInput
             style={styles.textBox}
             placeholder=""
