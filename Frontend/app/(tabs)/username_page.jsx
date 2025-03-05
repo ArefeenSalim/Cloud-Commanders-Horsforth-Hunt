@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import { AddPlayer } from '../../utils/API Functions/AddPlayer';
 import { CreateGame } from '../../utils/API Functions/CreateGame';
 import { setItem, getItem } from '../../utils/AsyncStorage'
-import { Link } from 'expo-router'
 
 const router = useRouter(); // Get router instance
 const [text, setText] = useState('');
@@ -16,11 +15,10 @@ export default function UsernamePage() {
 
     const InitLobby = async (username) => {
         console.log("InitLobby Triggered")
-        const isHost = await getItem('isHost')
         if (username === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
             Alert.alert('Error', 'Input Username');
             return;
-        } else if (username != null || username != undefined || await getItem('isHost')) {
+        } else if ((username != null || username != undefined) && await getItem('isHost')) {
                   try {
                   const result = await CreateGame(await getItem('lobbyName'), mapNumb, 'short')
             

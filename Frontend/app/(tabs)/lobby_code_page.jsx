@@ -14,11 +14,20 @@ export default function LobbyCodePage() {
   const saveLobbyID = async (lobbyID) => {
       if (lobbyID === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
         Alert.alert('Error', 'Input Lobby Code');
-      } else if (lobbyID != null || lobbyID != undefined) {
+      } else if (lobbyID != null || lobbyID != undefined) {        
         try {
-        await setItem('localGameID', parseInt(lobbyID))
-        await setItem('isHost', false);
-        router.navigate('/username_page');
+          let parsedLobbyID = parseInt(lobbyID)
+          if (!isNaN(parsedLobbyID) && lobbyID === '' + parsedLobbyID) {
+            await setItem('localGameID', parseInt(lobbyID))
+            await setItem('isHost', false);
+            router.navigate('/username_page');
+          } else {
+            if (Platform.OS == 'android' || Platform.OS == 'ios') {
+              Alert.alert('Error', 'Input Integer');
+            } else {
+              console.log("Error, input Integer");
+            }
+          }
         } catch (error) {
           if (lobbyID === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
             Alert.alert('Error', 'Input Integer');
