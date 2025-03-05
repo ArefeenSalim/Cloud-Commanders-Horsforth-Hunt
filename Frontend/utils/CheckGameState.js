@@ -46,10 +46,10 @@ export async function GetGameState(gameID) {
             }
     
             const data = await response.json();    
-            return data;
+            return { success: true, data };
         } catch (error) {
-            console.error("Error getting Game State:", error);
-            throw error; // Re-throw so caller can handle it
+            console.error("Error getting game state:", error);
+            return { success: false, error: error}
         }
 }
 

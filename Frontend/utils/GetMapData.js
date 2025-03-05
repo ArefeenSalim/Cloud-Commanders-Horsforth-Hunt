@@ -1,38 +1,42 @@
 // Function needs a mapID to locate which map to reference to retrieve the details of it, then converts to an object to be used.
-export function GetMapData(mapID) {
-
-    var mapData = null;
+export async function GetMapData(mapID) {
 
     // Making our connection 
     const mapIDString = mapID.toString();
     const url = 'http://trinity-developments.co.uk/maps/' + mapIDString;
 
     // Using fetch API
-    fetch(url, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json;charset=UTF-8"
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            return response.json().then(err => Promise.reject(err));
-        }
-    })
-    .then(data => {
-        console.log(data);
-        mapData = data;
-        return mapData;
-    })
-    .catch(error => {
-        console.error("Error:", error);
-    });
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        });
 
-    // If map data was successfully acquired, then it shall return said map data as an object, otherwise it shall return null after a period of time.
-    setTimeout(function(){
-        return mapData;
-    }, 5000);
+        // Ensure we return and handle the response properly
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        //For Testing response body
+
+
+        return { success: true, data };
+    } catch (error) {
+        console.error("Error adding game:", error);
+        return { success: false, error: error}
+    }
 }
-GetMapData(1);
+
+// Test Call
+await GetMapData(1)
+.then((result) => {
+    if (result.success) {
+        console.log('JSON Data:', result.data);
+        const returnData = result.data;
+        console.log(returnData);
+    } else {
+        console.error('Error:', result.error)
+    }
+});

@@ -1,6 +1,5 @@
 // Function used to create a lobby for players to join onto.
-export function CreateGame(gameName, mapID, gameLength) {
-    return new Promise((resolve, reject) => {
+export async function CreateGame(gameName, mapID, gameLength) {
         // Create Send Object & convert it to JSON
         const sendObj = {
             name: gameName,
@@ -12,23 +11,29 @@ export function CreateGame(gameName, mapID, gameLength) {
         // Making our connection using fetch
         const url = 'http://trinity-developments.co.uk/games/';
 
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: sendJSON,
-        })
-        .then((response) => response.json())
-        .then((responseData) => {
-            console.log(responseData);
-            resolve(responseData);
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-            reject(error);
-        });
-    });
+        try {//throw new Error("This is a dummy error.");
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: sendJSON,
+            });
+    
+            // Ensure we return and handle the response properly
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+    
+            const data = await response.json();
+    
+            //For Testing response body
+    
+    
+            return { success: true, data };
+        } catch (error) {
+            console.error("Error making game:", error);
+            return { success: false, error: error}
+        }
+    }
 
     /*
         Response should have the following Attributes:
@@ -43,9 +48,17 @@ export function CreateGame(gameName, mapID, gameLength) {
             "message": "Map with ID 123 not found"
         }
     */
-}
-//CreateGame("Cloud Commanders Test AddPlayer 3", 1, "Short");
 
+await CreateGame("Cloud Commanders Test Success", 1, "Short")
+    .then((result) => {
+        if (result.success) {
+            console.log('JSON Data:', result.data);
+            const returnData = result.data;
+            console.log(returnData);
+        } else {
+            console.error('Error:', result.error)
+        }
+    });
 
 
 

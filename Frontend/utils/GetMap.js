@@ -18,11 +18,10 @@ export async function getMaps() {
     // Log the fetched data to the console (can be replaced with logic to display it on the UI)
     console.log("Maps Data:", data);
 
-    return data;
-
+    return { success: true, data };
   } catch (error) {
-    // If any error occurs during the fetch, log the error message
-    console.error('Error fetching maps:', error);
+      console.error("Error getting map:", error);
+      return { success: false, error: error}
   }
 }
 

@@ -25,10 +25,10 @@ export async function AddPlayer(playerName, gameID) {
         //For Testing response body
 
 
-        return data;
+        return { success: true, data };
     } catch (error) {
-        console.error("Error adding player:", error);
-        throw error; // Re-throw so caller can handle it
+        console.error("Error adding game:", error);
+        return { success: false, error: error}
     }
 }
 

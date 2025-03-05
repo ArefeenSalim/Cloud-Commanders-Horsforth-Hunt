@@ -1,5 +1,5 @@
 // Function used to create a lobby for players to join onto.
-export function MakeMove(playerID, gameID, ticket, destination) {
+export async function MakeMove(playerID, gameID, ticket, destination) {
 
     // Creating variable for the response body
     var responseData = null;
@@ -12,27 +12,22 @@ export function MakeMove(playerID, gameID, ticket, destination) {
     const playerIDString = playerID.toString();
     const url = 'http://trinity-developments.co.uk/players/' + playerIDString + '/moves/';
 
-    // Using fetch API
-    fetch(url, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json;charset=UTF-8",
-        },
-        body: sendJSON
-    })
-    .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            return response.json().then(err => Promise.reject(err));
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' },
+            body: sendJSON
+        });
+
+        // Ensure we return and handle the response properly
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
-    })
-    .then(data => {
-        console.log(data);
-        responseData = data;
-        return responseData;
-    })
-    .catch(error => {
-        console.error("Error:", error);
-    });
+
+        const data = await response.json();    
+        return { success: true, data };
+    } catch (error) {
+        console.error("Error adding game:", error);
+        return { success: false, error: error}
+}
 }

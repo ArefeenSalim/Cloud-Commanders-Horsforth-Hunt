@@ -7,23 +7,21 @@ export const startGame = async (gameId, playerId) => {
 
   try {
     const response = await fetch(url, {
-      method: 'PATCH',
-      headers: headers,
+        method: 'PATCH',
+        headers: headers
     });
 
-    const data = await response.json();
-
-    if (response.ok) {
-      console.log('Game Started:', data.message);
-      console.log('Game ID:', data.gameId);
-      console.log('Game State:', data.state);
-      return data.json;
-    } else {
-      throw new Error(data.message || 'Something went wrong');
+    // Ensure we return and handle the response properly
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
     }
-  } catch (error) {
-    console.error('Error starting game:', error);
-  }
+
+    const data = await response.json();    
+    return { success: true, data };
+} catch (error) {
+    console.error("Error adding game:", error);
+    return { success: false, error: error}
+}
 };
 
 // Example usage:

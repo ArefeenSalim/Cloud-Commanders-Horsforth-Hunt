@@ -27,26 +27,38 @@ export const getOpenGames = async () => {
     const openGames = games.filter(game => game.status === 'open');
 
     // If there are open games, display them
-    if (openGames.length > 0) {
-      openGames.forEach(game => {
-        console.log(`Game Name: ${game.gameName}`);
-        console.log(`Map: ${game.mapName}`);
-        console.log(`Map Thumbnail: ${game.mapThumb}`);
-        console.log('Players:');
-        game.players.forEach(player => {
-          console.log(`- ${player.playerName}`);
-        });
-        console.log('----------------------------');
-      });
-      return JSON.parse(data);
-    } else {
-      console.log('No open games found.');
-    }
+    // if (openGames.length > 0) {
+    //   openGames.forEach(game => {
+    //     console.log(`Game Name: ${game.gameName}`);
+    //     console.log(`Map: ${game.mapName}`);
+    //     console.log(`Map Thumbnail: ${game.mapThumb}`);
+    //     console.log('Players:');
+    //     game.players.forEach(player => {
+    //       console.log(`- ${player.playerName}`);
+    //     });
+    //     console.log('----------------------------');
+    //   });
+    //   return { success: true, data };
+    // } else {
+    //   console.log('No open games found.');
+    // }
+
+    return {success: true, data};
 
   } catch (error) {
     console.error('Error fetching open games:', error);
+    return { success: false, error: error}
   }
 };
 
 // Call the function to get and display open games
-getOpenGames();
+await getOpenGames()
+.then((result) => {
+  if (result.success) {
+      console.log('JSON Data:', result.data);
+      const returnData = result.data;
+      console.log(returnData);
+  } else {
+      console.error('Error:', result.error)
+  }
+});
