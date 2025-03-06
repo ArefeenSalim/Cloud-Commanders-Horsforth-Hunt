@@ -49,8 +49,8 @@ export async function getPlayerDetails(playerId) {
 }
 
 // Example usage
-const playerId = 107;
-const playerDetails = await getPlayerDetails(playerId);
+// const playerId = 107;
+// const playerDetails = await getPlayerDetails(playerId);
 
-console.log(playerDetails,  '\n' + playerDetails.role);
+// console.log(playerDetails,  '\n' + playerDetails.role);
 

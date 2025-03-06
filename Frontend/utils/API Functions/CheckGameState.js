@@ -54,9 +54,9 @@ export async function GetGameState(gameID) {
 }
 
 // Testing API Function
-const gameState = await GetGameState(51); // Call the function with the mock response
+// const gameState = await GetGameState(51); // Call the function with the mock response
 
-console.log("\nReturned Game State Object:", gameState); // Log the returned game state object
+// console.log("\nReturned Game State Object:", gameState); // Log the returned game state object
 
-console.log(gameState.gameId);
-console.log(gameState.players[0].playerName);
+// console.log(gameState.gameId);
+// console.log(gameState.players[0].playerName);

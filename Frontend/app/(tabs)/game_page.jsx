@@ -9,10 +9,13 @@ import Animated, {
   clamp
 } from 'react-native-reanimated';
 import { GetMapData } from '../../utils/API Functions/GetMapData';
+import { GetGameState } from '../../utils/API Functions/CheckGameState';
 import { getItem, setItem } from '../../utils/AsyncStorage';
+import { getPlayerDetails } from '../../utils/API Functions/GetPlayerDetail';
 
 const MapViewer = () => {
   const [mapData, setMapData] = useState(null);
+  const [playerLocations, setPlayerLocations] = useState([]);
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
@@ -25,6 +28,28 @@ const MapViewer = () => {
     await setItem('localLocationChoice', locationID)
     console.log(await getItem('localLocationChoice'))
   }
+
+  // const getPlayerDetails = async() => {
+  //   const gameId = await getItem('localGameID')
+  //   try {
+  //     const result = await GetGameState(gameId);
+  //     if (result.success) {
+  //       gameData(result.data);
+  //     } else {
+  //       console.error('Error:', result.error);
+  //       return
+  //     }
+  //   } catch (error) {
+  //     console.error('Fetch error:', error);
+  //     return
+  //   }  
+  //   if (await getItem('LocalPlayerID') == gameData.players[0])  {
+
+  //   }
+  //   for (let i = 1; i < Object.keys(gameData.players); i++) {
+
+  //   }
+  // }
 
   // Example buttons (x, y positions are relative to the map)
   useEffect(() => {
@@ -42,6 +67,43 @@ const MapViewer = () => {
     };
 
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const intervalId = setInterval(async () => {
+      try {
+        const result = await GetMapData(mapID);
+        if (result.success) {
+          const gameState = await GetGameState(await getItem('localGameID'))
+         // Update first player's location if needed
+         if (gameState.data.players[0].playerId === await getItem('localPlayerId')) {
+          const externalPlayerLocation = await getPlayerDetails(gameState.data.players[0].playerId);
+          gameState.data.players[0].location = externalPlayerLocation.location;
+        }
+
+        // Create a new array with updated player positions
+        const updatedPlayers = gameState.data.players.map((player, i) => {
+          if (i === 0) return player; // Skip player 0
+          const locationIndex = player.location - 1;
+          return {
+            ...player, // Copy existing player data
+            xPos: result.data.locations[locationIndex]?.xPos ?? 0,
+            yPos: result.data.locations[locationIndex]?.yPos ?? 0,
+          };
+        });
+
+        console.log("Player Position Fetch Completed");
+        console.log("Player Positions:", updatedPlayers);
+        setPlayerLocations(updatedPlayers);
+        } else {
+          console.error('Error:', result.error);
+        }
+      } catch (error) {
+        console.error('Fetch error:', error);
+      }
+    }, 5000);
+
+    return () => clearInterval(intervalId)
   }, []);
 
   let mapWidth = 0;
@@ -138,10 +200,9 @@ const MapViewer = () => {
     <GestureHandlerRootView>
     <View style={styles.container}>
       <GestureDetector gesture={combinedGesture}>
-        <Animated.View style={[styles.mapContainer, animatedStyle]}>
+        <Animated.View style={[styles.mapContainer, animatedStyle, {position: 'absolute'}]}>
             {/* Map Locations */}
               <Image
-                key={0} // Ensure each child has a unique key
                 source={{ uri: mapData.mapImage }}
                 style={{
                   width: mapData.mapWidth,
@@ -168,7 +229,23 @@ const MapViewer = () => {
           ))}
 
           {/* Player Tokens */}
-            <View style={styles.circle} />
+          <View style={{ position: "absolute", left: 0, top: 0 }}>
+            {playerLocations
+            .filter((loc) => loc.location !== "Hidden")
+            .map((loc) => (
+              <View 
+              key={loc.location}
+              style={[
+                styles.circle,
+                {
+                  left: loc.xPos,
+                  top: loc.yPos,        
+                },
+              ]}
+              />
+            ))}
+
+          </View>
         </Animated.View>
       </GestureDetector>
     </View>
@@ -191,16 +268,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'red',
     padding: 10,
     borderRadius: 10,
+    width: 40,
+    height: 40,
   },
   buttonText: {
     color: 'white',
     fontWeight: 'bold',
   },
   circle: {
-    width: 100,
-    height: 100,
-    borderRadius: 100 / 2,
-    backgroundColor: "red",
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "blue",
   },
 });
 
