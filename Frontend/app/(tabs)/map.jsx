@@ -14,10 +14,10 @@ const MapPage = () => {
     <View style={styles.container}>
       <Text style={styles.title}>React Native Buttons</Text>
       <TouchableOpacity style={styles.button} onPress={handlePress1}>
-        <Text style={styles.buttonText}>Button 1</Text>
+        <Text style={styles.buttonText}>Dr X movements</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={handlePress2}>
-        <Text style={styles.buttonText}>Button 2</Text>
+        <Text style={styles.buttonText}>Tickets</Text>
       </TouchableOpacity>
     </View>
   );
