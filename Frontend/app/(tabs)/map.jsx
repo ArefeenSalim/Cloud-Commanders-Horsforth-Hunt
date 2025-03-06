@@ -10,7 +10,7 @@ const MapPage = () => {
   };
 
   const handlePress2 = () => {
-    setTicketsModalVisible(true); // Show Tickets modal
+    setTicketsModalVisible(true); // Show Tickets modal at bottom
   };
 
   const handleColorButtonPress = (color) => {
@@ -23,7 +23,7 @@ const MapPage = () => {
       {/* Dr X Button (Left Side) */}
       <View style={styles.leftButtonContainer}>
         <TouchableOpacity style={styles.drXButton} onPress={handlePress1}>
-          <Text style={styles.buttonText}>Dr X Movements      </Text>
+          <Text style={styles.buttonText}>Dr X</Text>
         </TouchableOpacity>
       </View>
 
@@ -54,15 +54,15 @@ const MapPage = () => {
         </View>
       </Modal>
 
-      {/* Tickets Modal (Blue Pop-up) */}
+      {/* Tickets Modal (Bottom Pop-up with 3 buttons) */}
       <Modal
         transparent={true}
         visible={ticketsModalVisible}
         animationType="slide"
         onRequestClose={() => setTicketsModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
+        <View style={styles.bottomModalContainer}>
+          <View style={styles.ticketsModal}>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setTicketsModalVisible(false)}
@@ -70,24 +70,26 @@ const MapPage = () => {
               <Text style={styles.closeButtonText}>X</Text>
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Choose a ticket</Text>
-            <TouchableOpacity
-              style={[styles.colorButton, { backgroundColor: '#CDDBE7' }]}
-              onPress={() => handleColorButtonPress('Blue')}
-            >
-              <Text style={styles.buttonText}>Blue</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.colorButton, { backgroundColor: '#FF474C' }]}
-              onPress={() => handleColorButtonPress('Red')}
-            >
-              <Text style={styles.buttonText}>Red</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.colorButton, { backgroundColor: '#ADF802' }]}
-              onPress={() => handleColorButtonPress('Green')}
-            >
-              <Text style={styles.buttonText}>Green</Text>
-            </TouchableOpacity>
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.colorButton, { backgroundColor: '#CDDBE7' }]}
+                onPress={() => handleColorButtonPress('Blue')}
+              >
+                <Text style={styles.buttonText}>Blue</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.colorButton, { backgroundColor: '#FF474C' }]}
+                onPress={() => handleColorButtonPress('Red')}
+              >
+                <Text style={styles.buttonText}>Red</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.colorButton, { backgroundColor: '#ADF802' }]}
+                onPress={() => handleColorButtonPress('Green')}
+              >
+                <Text style={styles.buttonText}>Green</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -104,7 +106,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#000000',
-    fontSize: 8,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   drXButton: {
@@ -112,15 +114,16 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     marginVertical: 10,
-    width: 50,
+    width: 100,
     alignItems: 'center',
   },
   ticketsButton: {
     backgroundColor: '#add8e6', 
-    padding: 0,
     borderRadius: 10,
     marginVertical: 10,
-    width: 150,
+    height: 50,
+    width: 100,
+    justifyContent: 'center',
     alignItems: 'center',
   },
   leftButtonContainer: {
@@ -146,27 +149,26 @@ const styles = StyleSheet.create({
     width: 200,
     height: 600,
     alignItems: 'center',
-    position: 'relative', // Helps position the X button inside
+    position: 'relative', 
   },
-  ticketmodalContainer: {
-    backgroundColor: 'white',
+  bottomModalContainer: {
+    flex: 1,
+    justifyContent: 'flex-end', 
+  },
+  ticketsModal: {
+    backgroundColor: '#ff7f7f', 
     padding: 20,
-    borderRadius: 10,
-    width: 300,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    width: '100%',
     alignItems: 'center',
-    position: 'relative', // Helps position the X button inside
+    position: 'relative',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-  },
-  modalContent: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-    color: 'white',
   },
   closeButton: {
     position: 'absolute',
@@ -184,11 +186,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
+  buttonRow: {
+    flexDirection: 'row', 
+    justifyContent: 'space-evenly', 
+    width: '100%',
+  },
   colorButton: {
     padding: 15,
     borderRadius: 10,
-    marginVertical: 10,
-    width: 200,
+    width: 80, 
+    height: 80, 
+    justifyContent: 'center',
     alignItems: 'center',
   },
 });
