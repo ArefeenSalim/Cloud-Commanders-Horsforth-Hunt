@@ -12,12 +12,11 @@ const MapPage = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>React Native Buttons</Text>
       <TouchableOpacity style={styles.button} onPress={handlePress1}>
-        <Text style={styles.buttonText}>Button 1</Text>
+        <Text style={styles.buttonText}>Dr X movements</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={handlePress2}>
-        <Text style={styles.buttonText}>Button 2</Text>
+        <Text style={styles.buttonText}>Tickets</Text>
       </TouchableOpacity>
     </View>
   );
@@ -28,7 +27,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#000000',
   },
   title: {
     fontSize: 24,
@@ -36,7 +35,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#007BFF',
+    backgroundColor: '#DDDD91',
     padding: 15,
     borderRadius: 10,
     marginVertical: 10,
@@ -44,7 +43,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: '#000000',
     fontSize: 16,
     fontWeight: 'bold',
   },

@@ -1,4 +1,4 @@
-gclass KickPlayerResponse {
+class KickPlayerResponse {
     constructor(message, gameId, playerId) {
         this.message = message;
         this.gameId = gameId;
