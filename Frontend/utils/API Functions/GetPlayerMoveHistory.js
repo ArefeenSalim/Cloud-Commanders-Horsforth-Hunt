@@ -20,13 +20,12 @@ export async function getPlayerDetail(playerId) {
         }
 
         const data = await response.json();    
-        return data;
+        return { success: true, data };
     } catch (error) {
-        console.error("Error getting Game State:", error);
-        throw error; // Re-throw so caller can handle it
-    }
+        console.error("Error adding game:", error);
+        return { success: false, error: error}
 }
-
+}
 // Example usage:
 const playerId = 107; // Example player ID
 // getPlayerDetail(playerId).then(player => {

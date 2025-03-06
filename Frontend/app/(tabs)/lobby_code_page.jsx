@@ -1,6 +1,7 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native'
 import { useRouter, Link } from "expo-router";
-import React, { useState } from 'react'; 
+import React, { useState } from 'react';
+import { setItem } from '../../utils/AsyncStorage'; 
 
 
 const router = useRouter(); // Get router instance
@@ -9,14 +10,41 @@ const [text, setText] = useState('');
 export default function LobbyCodePage() {
   const router = useRouter(); // Get router instance
   const [text, setText] = useState('');
+
+  const saveLobbyID = async (lobbyID) => {
+      if (lobbyID === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
+        Alert.alert('Error', 'Input Lobby Code');
+      } else if (lobbyID != null || lobbyID != undefined) {        
+        try {
+          let parsedLobbyID = parseInt(lobbyID)
+          if (!isNaN(parsedLobbyID) && lobbyID === '' + parsedLobbyID) {
+            await setItem('localGameID', parseInt(lobbyID))
+            await setItem('isHost', false);
+            router.navigate('/username_page');
+          } else {
+            if (Platform.OS == 'android' || Platform.OS == 'ios') {
+              Alert.alert('Error', 'Input Integer');
+            } else {
+              console.log("Error, input Integer");
+            }
+          }
+        } catch (error) {
+          if (lobbyID === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
+            Alert.alert('Error', 'Input Integer');
+          } else {
+            console.log("Error, input Integer");
+          }
+        }
+      };
+    }
   
   return (
     
     <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
       <Text style={styles.lobbyText}>Enter Lobby ID Here:</Text>
-      <Link href="/username_page" style={styles.JoinButton}>
+      <TouchableOpacity onPress={() => saveLobbyID(text)} style={styles.JoinButton}>
       <Text style={styles.joinButtonText}>Join Game</Text>
-      </Link>
+      </TouchableOpacity>
     <TextInput
       style={styles.textBox}
       placeholder=""

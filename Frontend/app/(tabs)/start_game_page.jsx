@@ -1,20 +1,59 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native'
+import { View, Text, Image, StyleSheet, TextInput } from 'react-native'
 import { useRouter } from "expo-router";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'expo-router'
 
 const router = useRouter(); // Get router instance
 const [text, setText] = useState('');
 
 export default function StartGamePage() {
+    let lobbyCode = "Sample Text";
     return (
+
         <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
-            <Text style={styles.lobbyCodeText}>Enter Your username:</Text>
+            <Text style={styles.lobbyCodeText}>Lobby Code:</Text>
+            <text style={styles.lobbyCodeDisplay}>{lobbyCode}</text>
+            
+            <Link href="/" style={styles.startGame}>
+            <text style={styles.startGameText}>Start Game</text>
+            </Link>
         </View>
     )
 }
 
 const styles = StyleSheet.create ({
     lobbyCodeText: {
-        
-    }
+        marginBottom: 600,
+        marginRight: 160,
+        fontSize: 36,
+        fontStyle: 'bold',
+        color: '#DDDD91',
+    },
+    
+    lobbyCodeDisplay: {
+        position: 'absolute',
+        backgroundColor: '#DDDD91',
+        marginBottom: 770,
+        marginLeft: 220,
+        width: 150,
+        height: 50,
+        fontSize: 24,
+        color: 'black'
+    },
+
+    startGame: {
+        backgroundColor: '#DDDD91',
+        paddingVertical: 15,
+        paddingHorizontal: 40,
+        borderRadius: 10,
+        paddingTop: 30,
+        marginBottom: '100px',
+    },
+
+    startGameText: {
+        color: 'black',
+        fontSize: 28,
+        textAlign: 'center',
+        fontWeight: 'bold',
+    },
 })

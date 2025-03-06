@@ -1,7 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Platform } from 'react-native'
 import { useRouter, Link } from "expo-router";
 import React, { useState } from 'react'; 
-import { CreateGame } from '../../utils/CreateGame'
+import { CreateGame } from '../../utils/API Functions/CreateGame'
+import { setItem, getItem } from '../../utils/AsyncStorage'
 
 // const router = useRouter(); // Get router instance
 // const [text, setText] = useState('');
@@ -11,22 +12,22 @@ export default function LobbyCodePage() {
   const router = useRouter(); // Get router instance
   const [text, setText] = useState('');
 
-  const createLobby = (lobbyName) => {
-    if (lobbyName === "" &&(Platform.OS == 'android' || Platform.OS == 'ios')) {
+  const becomeHost = async (lobbyName) => {
+    if (lobbyName === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
       Alert.alert('Error', 'Input Lobby Code');
     } else if (lobbyName != null || lobbyName != undefined) {
-      console.log("Before CreateGame");
-      console.log(CreateGame(lobbyName, 1, 'short'));
-      console.log("Made past CreateGame");
+      await setItem('lobbyName', lobbyName)
+      await setItem('isHost', true);
       router.navigate('/username_page');
-    }
+    };
   }
+  
 
   return (
 
     <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
       <Text style={styles.lobbyText}>Enter Lobby Name Here:</Text>
-      <TouchableOpacity onPress={() => createLobby(text)} style={styles.JoinButton}>
+      <TouchableOpacity onPress={() => becomeHost(text)} style={styles.JoinButton}>
         <Text style={styles.joinButtonText}>Create Game</Text>
       </TouchableOpacity>
       <TextInput
