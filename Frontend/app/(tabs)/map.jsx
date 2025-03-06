@@ -12,7 +12,6 @@ const MapPage = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>React Native Buttons</Text>
       <TouchableOpacity style={styles.button} onPress={handlePress1}>
         <Text style={styles.buttonText}>Dr X movements</Text>
       </TouchableOpacity>

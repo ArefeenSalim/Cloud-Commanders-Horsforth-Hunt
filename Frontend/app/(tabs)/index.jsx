@@ -30,6 +30,9 @@ export default function index() {
     <Link href="/game_page" style={styles.button}>
         <Text style={styles.buttonText}>Load Game (TESTING)</Text>
     </Link>
+    <Link href="/map" style={styles.button}>
+        <Text style={styles.buttonText}>Map page (TESTING)</Text>
+    </Link>
     </View>
     </View>
   )
