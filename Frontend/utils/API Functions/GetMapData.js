@@ -24,19 +24,19 @@ export async function GetMapData(mapID) {
 
         return { success: true, data };
     } catch (error) {
-        console.error("Error adding game:", error);
+        console.error("Error getting map data:", error);
         return { success: false, error: error}
     }
 }
 
 // Test Call
-await GetMapData(1)
-.then((result) => {
-    if (result.success) {
-        console.log('JSON Data:', result.data);
-        const returnData = result.data;
-        console.log(returnData);
-    } else {
-        console.error('Error:', result.error)
-    }
-});
+// await GetMapData(1)
+// .then((result) => {
+//     if (result.success) {
+//         console.log('JSON Data:', result.data);
+//         const returnData = result.data;
+//         console.log(returnData);
+//     } else {
+//         console.error('Error:', result.error)
+//     }
+// });
