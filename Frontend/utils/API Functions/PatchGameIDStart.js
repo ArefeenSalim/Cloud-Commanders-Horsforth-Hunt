@@ -1,4 +1,4 @@
-export const startGame = async (gameId, playerId) => {
+export const StartGame = async (gameId, playerId) => {
   const url = `http://trinity-developments.co.uk/games/${gameId}/start/${playerId}`;
   
   const headers = {
