@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Text, Modal, ActivityIndicator, Dimensions } from 'react-native';
 import { GestureHandlerRootView, GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, {
@@ -12,21 +12,34 @@ import { GetMapData } from '../../utils/API Functions/GetMapData';
 import { GetGameState } from '../../utils/API Functions/CheckGameState';
 import { getItem, setItem } from '../../utils/AsyncStorage';
 import { getPlayerDetails } from '../../utils/API Functions/GetPlayerDetail';
+import { GetPlayerMoveHistory } from '../../utils/API Functions/GetPlayerMoveHistory';
+import Grid from './grid';
 
 const { width, height } = Dimensions.get('window');
-const colorMapping = {
+const colourMapping = {
   yellow: 'yellow',
   green: 'green',
   red: 'red',
   black: 'black',
-  x2: '#ff6347' // or any other color for x2
+  x2: '#ff6347'
+};
+const textColourMapping = {
+  yellow: 'black',
+  green: 'black',
+  red: 'black',
+  black: 'white',
+  x2: 'black'
+};
+const gameDuration = {
+  short: 13,
+  long: 22,
 };
 
 const MapViewer = () => {
   const [mapData, setMapData] = useState(null);
   const [playerLocations, setPlayerLocations] = useState([]);
-  const [playerInfo, setPlayerInfo] = useState([]);
   const [tickets, setTickets] = useState([]);
+  const [boxesData, setBoxesData] = useState([]);
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
@@ -40,6 +53,7 @@ const MapViewer = () => {
   
   const handlePress1 = () => {
     setDrXModalVisible(true); // Show Dr X modal
+    fetchDrXMoveHis();
   };
 
   const handlePress2 = () => {
@@ -125,7 +139,6 @@ const MapViewer = () => {
         });
 
         console.log("Player Position Fetch Completed");
-        console.log("Player Positions:", updatedPlayers);
         setPlayerLocations(updatedPlayers);
         } else {
           console.error('Error:', result.error);
@@ -141,7 +154,7 @@ const MapViewer = () => {
   // Function to check user's player data (e.g. tickets, role)
   const getPlayerData = async () => {
     try {
-      await setItem('localPlayerId', 155) // Here for testing purposes
+      await setItem('localPlayerId', 154) // Here for testing purposes
       const result = await getPlayerDetails(await getItem('localPlayerId'));
       if (result) {
         return result;
@@ -154,12 +167,8 @@ const MapViewer = () => {
   }
 
   const filterTickets = async () => {
-    console.log("Before get Player Data")
     const playerData = await getPlayerData();  // Get player data asynchronously
-    console.log("Post PlayerData")
-    console.log(playerData);
     const hideTickets = ["Detective"].includes(playerData.role);  // Check if the role is "Detective"
-    console.log("Post hideTickets")
     const ticketKeys = ['yellow', 'green', 'red', 'black', 'x2'];
 
     const filteredData = Object.fromEntries(
@@ -169,18 +178,54 @@ const MapViewer = () => {
 
     if (hideTickets) {
       // Convert playerData to an array, filter out "black" and "x2" keys, and return the new object
-      const filtereredTickets = Object.entries(filteredData)
+      const filteredTickets = Object.entries(filteredData)
         .filter(([key, value]) => !["black", "x2"].includes(key))
         .reduce((acc, [key, value]) => {
           acc[key] = value;  // Rebuild the object
           return acc;
         }, {});
-        console.log("Before filteredData")
-      setTickets(filtereredTickets)
-    }
-    console.log(filteredData);
+      setTickets(filteredTickets);
+    } else {
     setTickets(filteredData);  // Return original playerData if role is not "Detective"
+    }
   }
+
+  const filterData = (data) => {
+    return data.map(item => {
+      const { moveId, ...filteredItem } = item;
+      return filteredItem;
+    });
+  };
+
+  const filterAndModifyData = (data, targetIds) => {
+    return data.map(({ moveId, ...filteredItem }) => ({
+      ...filteredItem, 
+      text: targetIds.includes(filteredItem.round) ? `Dest: ${filteredItem.destination}` : filteredItem.text
+    }));
+  };
+
+  const fetchDrXMoveHis = useCallback(async () => {
+    try {
+      const gameID = await getItem('localGameID');
+      const gameData = await GetGameState(gameID);
+      const filteredGameData = gameData.data.players[0];
+      console.log(filteredGameData.playerId)
+      const fetchedData = await GetPlayerMoveHistory(filteredGameData.playerId);
+      const moveHistory = fetchedData.data.moves;
+      console.log(moveHistory);
+      const filteredMoveHistory = filterData(moveHistory);
+      console.log(filteredMoveHistory);
+
+      const revealRounds = [3, 8, 13, 18, 24];
+      const DrXDisplay = filterAndModifyData(filteredMoveHistory, revealRounds);
+
+
+      setBoxesData(DrXDisplay);
+    } catch (error) {
+      console.log("Fetch Dr X Error")
+      console.log('Error: ', error);
+    }
+  }, []);
 
   let mapWidth = 0;
   let mapHeight = 0;
@@ -308,11 +353,14 @@ const MapViewer = () => {
                   <Text style={styles.closeButtonText}>X</Text>
                 </TouchableOpacity>
                 <Text style={styles.modalTitle}>Dr X Movements</Text>
+                <View>
+                <Grid fetchDrXMoveHis={fetchDrXMoveHis} boxesData={boxesData} />
+                </View>
               </View>
             </View>
           </Modal>
     
-          {/* Tickets Modal (Bottom Pop-up with 3 buttons) */}
+          {/* Tickets Modal */}
           <Modal
             transparent={true}
             visible={ticketsModalVisible}
@@ -332,12 +380,12 @@ const MapViewer = () => {
 
                   {Object.entries(tickets).map(([ticketType, count]) => (
                     <TouchableOpacity
-                      style={[styles.colorButton, { backgroundColor: colorMapping[ticketType] || 'gray' }]}
+                      style={[styles.colorButton, { backgroundColor: colourMapping[ticketType] || 'gray' }]}
                       key={ticketType}  // Ensure each button has a unique key
                       onPress={() => handleColorButtonPress(ticketType)}  // Handle button press
                     >
-                      <Text style={styles.overlayButtonText}>{ticketType}</Text>
-                      <Text style={styles.overlayButtonText}>{count}</Text>
+                      <Text style={[styles.overlayButtonText, { color: textColourMapping[ticketType]}]}>{ticketType}</Text>
+                      <Text style={[styles.overlayButtonText, { color: textColourMapping[ticketType]}]}>{count}</Text>
                     </TouchableOpacity>
                   ))}
                   {/*
@@ -548,7 +596,8 @@ const styles = StyleSheet.create({
   buttonRow: {
     flexDirection: 'row', 
     justifyContent: 'space-evenly', 
-    width: '100%',
+    width: width,
+    flexWrap: 'wrap',
   },
   colorButton: {
     padding: 15,
