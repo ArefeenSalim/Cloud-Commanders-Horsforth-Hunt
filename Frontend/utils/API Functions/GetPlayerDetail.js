@@ -25,8 +25,7 @@ class PlayerDetail {
 export async function getPlayerDetails(playerId) {
         
         // Construct the URL
-        const playerIDString = playerId.toString();
-        const url = `http://trinity-developments.co.uk/players/${playerIDString}`;
+        const url = `http://trinity-developments.co.uk/players/${playerId}`;
     
         try {
             const response = await fetch(url, {
@@ -42,7 +41,7 @@ export async function getPlayerDetails(playerId) {
             const data = await response.json();    
             return data;
         } catch (error) {
-            console.error("Error getting Player Dtails:", error);
+            console.error("Error getting Player Details:", error);
             throw error; // Re-throw so caller can handle it
         }
 
