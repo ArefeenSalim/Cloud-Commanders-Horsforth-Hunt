@@ -1,3 +1,5 @@
+// game_page.jsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Text, Modal, ActivityIndicator, Dimensions } from 'react-native';
 import { GestureHandlerRootView, GestureDetector, Gesture } from 'react-native-gesture-handler';
@@ -151,6 +153,10 @@ const MapViewer = () => {
     return () => clearInterval(intervalId)
   }, []);
 
+  // useEffect(() => {
+  //   fetchDrXMoveHis();
+  // }, []);
+
   // Function to check user's player data (e.g. tickets, role)
   const getPlayerData = async () => {
     try {
@@ -208,19 +214,35 @@ const MapViewer = () => {
     try {
       const gameID = await getItem('localGameID');
       const gameData = await GetGameState(gameID);
+      const length = gameData.data.length;
       const filteredGameData = gameData.data.players[0];
       console.log(filteredGameData.playerId)
       const fetchedData = await GetPlayerMoveHistory(filteredGameData.playerId);
       const moveHistory = fetchedData.data.moves;
-      console.log(moveHistory);
       const filteredMoveHistory = filterData(moveHistory);
-      console.log(filteredMoveHistory);
 
       const revealRounds = [3, 8, 13, 18, 24];
       const DrXDisplay = filterAndModifyData(filteredMoveHistory, revealRounds);
 
+      const defaultBoxes = Array.from({ length }, (_, index) => ({
+        round: index + 1, // 1-based index
+        ticket: null, // No ticket assigned yet
+        text: '', // No text by default
+      }));
 
-      setBoxesData(DrXDisplay);
+      const mergedBoxes = defaultBoxes.map((defaultBox) => {
+        // Find a move that matches the round
+        const move = DrXDisplay.find((box) => box.round === defaultBox.round);
+        return move ? move : defaultBox;
+      });
+
+      console.log(mergedBoxes)
+
+
+      setBoxesData(mergedBoxes);
+      return mergedBoxes;
+
+      
     } catch (error) {
       console.log("Fetch Dr X Error")
       console.log('Error: ', error);

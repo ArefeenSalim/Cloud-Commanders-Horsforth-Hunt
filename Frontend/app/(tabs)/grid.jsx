@@ -8,23 +8,35 @@ const colourMapping = {
   green: 'green',
   red: 'red',
   black: 'black',
-  x2: '#ff6347'
+  x2: '#ff6347',
+  null: 'Orange',
 };
 
 const Grid = ({ fetchDrXMoveHis, boxesData }) => {
-    return (
-      <View style={styles.gridContainer}>
-        {boxesData.map((box) => (
+    console.log("Grid received boxesData:", boxesData);
+  
+    const renderBoxes = () => {
+      return boxesData.map((box, index) => {
+        console.log(`Rendering Box ${index}:`, box); // Properly logging each item
+  
+        const backgroundColor = box.ticketType
+        ? colourMapping[box.ticket] || "gray"
+        : "orange";
+
+        return (
           <TouchableOpacity
             key={box.round}
-            style={[styles.box, { backgroundColor: colourMapping[box.ticketType] || 'gray' }]}
+            style={[styles.box, { backgroundColor }]}
           >
-            {box.destination ? <Text style={styles.boxText}>{box.destination}</Text> : null}
+            <Text>{box.round}</Text>
+            {box.text ? <Text style={styles.boxText}>{box.text}</Text> : null}
           </TouchableOpacity>
-        ))}
-      </View>
-    );
-  };
+        );
+      });
+    };
+  
+    return <View style={styles.gridContainer}>{renderBoxes()}</View>;
+}
 
 const styles = StyleSheet.create({
   gridContainer: {
