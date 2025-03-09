@@ -33,6 +33,3 @@ export async function MakeMove(playerID, gameID, ticket, destination) {
         return { success: false, error };
     }
 }
-
-MakeMove(381, 55, 'yellow', 1)
-MakeMove(382, 55, 'yellow', 6)

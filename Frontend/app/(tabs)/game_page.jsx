@@ -173,13 +173,29 @@ const MapViewer = () => {
           }
         }
 
+        const colourOffsets = {
+          Clear: { x: -10, y: -10 },
+          Red: { x: 10, y: -10 },
+          Green: { x: -10, y: 10 },
+          Blue: { x: 10, y: 10 },
+          Yellow: { x: 10, y: 0 },
+          Black: { x: -10, y: 0 },
+          default: { x: 0, y: 0 },
+        };
+
+
         // Create a new array with updated player positions
         const updatedPlayers = gameState.data.players.map((player, i) => {
           const locationIndex = player.location - 1;
+
+          const offset = colourOffsets[player.colour] || colourOffsets.default;
+
           return {
             ...player, // Copy existing player data
-            xPos: result.data.locations[locationIndex]?.xPos ?? 0,
-            yPos: result.data.locations[locationIndex]?.yPos ?? 0,
+            xPos: offset.x,
+            yPos: offset.y,
+            //xPos: result.data.locations[locationIndex]?.xPos ?? 0,
+            //yPos: result.data.locations[locationIndex]?.yPos ?? 0,
           };
         });
 
@@ -203,7 +219,6 @@ const MapViewer = () => {
   // Function to check user's player data (e.g. tickets, role)
   const getPlayerData = async () => {
     try {
-      await setItem('localPlayerId', 380) // Here for testing purposes
       const result = await getPlayerDetails(await getItem('localPlayerId'));
       if (result) {
         return result;
@@ -478,12 +493,30 @@ const MapViewer = () => {
               onPress={() => saveLocation(loc.location)}
             >
               <Text style={styles.buttonText}>{loc.location}</Text>
+              {playerLocations
+                .filter((playerLoc) => {
+                  return playerLoc.location !== "Hidden" && String(playerLoc.location) === String(loc.location)
+                })
+                .map((playerLoc) => (
+                  <View
+                    key={playerLoc.id} // ✅ Unique key per player
+                    style={[
+                      styles.circle,
+                      {
+                        left: playerLoc.xPos, // ✅ Apply offset instead of absolute positioning
+                        top: playerLoc.yPos,
+                        backgroundColor: playerLoc.colour.toLowerCase() === "clear" ? "purple" : playerLoc.colour.toLowerCase(),
+                      },
+                    ]}
+                  />
+                ))}
+                <Text>BRUH</Text>
             </TouchableOpacity>
           ))}
 
           {/* Player Tokens */}
           <View style={{ position: "absolute", left: 0, top: 0 }}>
-            {playerLocations
+            {/* {playerLocations
             .filter((loc) => loc.location !== "Hidden")
             .map((loc) => (
               <View 
@@ -497,7 +530,7 @@ const MapViewer = () => {
                 },
               ]}
               />
-            ))}
+            ))} */}
 
           </View>
         </Animated.View>
