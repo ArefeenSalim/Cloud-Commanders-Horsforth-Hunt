@@ -5,12 +5,20 @@ import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native
 import PropTypes from 'prop-types';
 
 const colourMapping = {
-  yellow: 'yellow',
-  green: 'green',
-  red: 'red',
-  black: 'black',
+  Yellow: 'yellow',
+  Green: 'green',
+  Red: 'red',
+  Black: 'black',
   x2: '#ff6347',
-  null: 'Orange',
+  null: 'gray',
+};
+const textColourMapping = {
+  Yellow: 'black',
+  Green: 'white',
+  Red: 'black',
+  Black: 'white',
+  x2: 'black',
+  null: 'black',
 };
 
 const Grid = ({ fetchDrXMoveHis, boxesData }) => {
@@ -20,17 +28,21 @@ const Grid = ({ fetchDrXMoveHis, boxesData }) => {
       return boxesData.map((box, index) => {
         console.log(`Rendering Box ${index}:`, box); // Properly logging each item
   
-        const backgroundColor = box.ticketType
-        ? colourMapping[box.ticket] || "gray"
-        : "orange";
+        const backgroundColor = box.ticket
+        ? colourMapping[box.ticket] || "orange"
+        : "gray";
+
+        const textColour = box.ticket
+        ? textColourMapping[box.ticket] || "black"
+        : "black";
 
         return (
           <TouchableOpacity
             key={box.round}
             style={[styles.box, { backgroundColor }]}
           >
-            <Text>{box.round}</Text>
-            {box.text ? <Text style={styles.boxText}>{box.text}</Text> : null}
+            <Text style={[styles.boxText, {color: textColour}]}>{box.round}</Text>
+            {box.text ? <Text style={[styles.boxText, {color: textColour}]}>{box.text}</Text> : null}
           </TouchableOpacity>
         );
       });
@@ -73,9 +85,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
+    borderWidth: 1,
+    borderColor: 'black',
   },
   boxText: {
-    color: 'white',
+    color: 'black',
     fontSize: 14,
     textAlign: 'center',
   },

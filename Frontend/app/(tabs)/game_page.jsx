@@ -44,6 +44,8 @@ const MapViewer = () => {
   const [tickets, setTickets] = useState([]);
   const [boxesData, setBoxesData] = useState([]);
   const [chosenTicket, setChosenTicket] = useState(null);
+  const [localLocation, setlocalLocation] = useState(null);
+  const [currentTurn, setCurrentTurn] = useState(null);
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
@@ -88,6 +90,8 @@ const MapViewer = () => {
       const makeMoveReturnBody = await MakeMove(playerID, gameID, chosenTicket, locationID)
       if (makeMoveReturnBody.success) {
         const makeMoveData = makeMoveReturnBody.data
+        setChosenTicket(null);
+        setlocalLocation(locationID);
         Alert.alert(makeMoveData.message)
       }
       else {
@@ -141,21 +145,36 @@ const MapViewer = () => {
   }, []);
 
   // Polling function to get and update player location data on map.
+  // Has been expanded to check the current game state and update that info
   useEffect(() => {
     const intervalId = setInterval(async () => {
       try {
         const result = await GetMapData(mapID);
         if (result.success) {
           const gameState = await GetGameState(await getItem('localGameID'))
-         // Update first player's location if needed
-         if (gameState.data.players[0].playerId === await getItem('localPlayerId')) {
-          const externalPlayerLocation = await getPlayerDetails(gameState.data.players[0].playerId);
-          gameState.data.players[0].location = externalPlayerLocation.location;
+          const currentTurn = gameState.data.state
+          if (currentTurn === "Over") {
+            const gameOver = currentTurn + '\n' + 'Winner: ' + gameState.data.winner;
+            setCurrentTurn(gameOver);
+          } else {
+          setCurrentTurn(currentTurn);
+          }
+          const fugativeID = gameState.data.players[0].playerId
+         // Update fugative location if needed
+         if (fugativeID === await getItem('localPlayerId')) {
+          console.log("Inside Fugative ID check")
+          const fugativeMoveHistory = await GetPlayerMoveHistory(fugativeID);
+          if (!fugativeMoveHistory.data.moves || fugativeMoveHistory.data.moves.length === 0) {
+            gameState.data.players[0].location = fugativeMoveHistory.data.startLocation;
+          } else {
+            console.log(localLocation);
+            gameState.data.players[0].location = localLocation;
+
+          }
         }
 
         // Create a new array with updated player positions
         const updatedPlayers = gameState.data.players.map((player, i) => {
-          if (i === 0) return player; // Skip player 0
           const locationIndex = player.location - 1;
           return {
             ...player, // Copy existing player data
@@ -164,8 +183,8 @@ const MapViewer = () => {
           };
         });
 
-        console.log("Player Position Fetch Completed");
         setPlayerLocations(updatedPlayers);
+        console.log("Player Position Fetch Completed", updatedPlayers)
         } else {
           console.error('Error:', result.error);
         }
@@ -175,7 +194,7 @@ const MapViewer = () => {
     }, 5000);
 
     return () => clearInterval(intervalId)
-  }, []);
+  }, [localLocation]);
 
   // useEffect(() => {
   //   fetchDrXMoveHis();
@@ -184,7 +203,7 @@ const MapViewer = () => {
   // Function to check user's player data (e.g. tickets, role)
   const getPlayerData = async () => {
     try {
-      await setItem('localPlayerId', 154) // Here for testing purposes
+      await setItem('localPlayerId', 380) // Here for testing purposes
       const result = await getPlayerDetails(await getItem('localPlayerId'));
       if (result) {
         return result;
@@ -238,7 +257,7 @@ const MapViewer = () => {
     try {
       const gameID = await getItem('localGameID');
       const gameData = await GetGameState(gameID);
-      const length = gameData.data.length;
+      const length = gameData.data.length + (Math.floor(gameData.data.length/10));
       const filteredGameData = gameData.data.players[0];
       console.log(filteredGameData.playerId)
       const fetchedData = await GetPlayerMoveHistory(filteredGameData.playerId);
@@ -352,15 +371,14 @@ const MapViewer = () => {
       );
     }
 
-
-  // const buttons = [
-  //   { id: 1, x: 100, y: 200, label: 'A' },
-  //   { id: 2, x: 250, y: 350, label: 'B' },
-  // ];
-
   return (
     <GestureHandlerRootView>
     <View style={styles.container}>
+
+      {/* Text box displaying the current turn */}
+      <View style={styles.turnBox}>
+        <Text style={styles.turnText}>Current Turn: {currentTurn}</Text>
+      </View>
     { /* Arefeen's Component Code */ }
 
         <View style={styles.overlayComponent}>
@@ -474,7 +492,8 @@ const MapViewer = () => {
                 styles.circle,
                 {
                   left: loc.xPos,
-                  top: loc.yPos,        
+                  top: loc.yPos,  
+                  backgroundColor: loc.colour.toLowerCase() === "clear" ? "purple" : loc.colour.toLowerCase()     
                 },
               ]}
               />
@@ -492,7 +511,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
   },
   gridContainer: {
@@ -521,7 +540,9 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "blue",
+    backgroundColor: "red",
+    borderWidth: 1,
+    borderColor: 'black',
   },
   overlayComponent: {
     position: 'absolute',
@@ -635,7 +656,20 @@ const styles = StyleSheet.create({
     height: 80, 
     justifyContent: 'center',
     alignItems: 'center',
-  }
+  },
+  turnBox: {
+    width: '100%',
+    padding: 10,
+    backgroundColor: '#ddd',
+    marginBottom: 20,
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  turnText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+  },
 });
 
 export default MapViewer;
