@@ -25,8 +25,8 @@ export const StartGame = async (gameId, playerId) => {
 };
 
 // Example usage:
-const gameId = '19';  // Replace with actual game ID
-const playerId = '107';  // Replace with the player ID trying to start the game
+const gameId = '55';  // Replace with actual game ID
+const playerId = '154';  // Replace with the player ID trying to start the game
 // const token = 'yourAccessToken';  // Replace with actual access token
 
-startGame(gameId, playerId);
+StartGame(gameId, playerId);

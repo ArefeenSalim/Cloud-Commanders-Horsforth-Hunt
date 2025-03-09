@@ -22,9 +22,6 @@ export async function AddPlayer(playerName, gameID) {
 
         const data = await response.json();
 
-        //For Testing response body
-
-
         return { success: true, data };
     } catch (error) {
         console.error("Error adding game:", error);

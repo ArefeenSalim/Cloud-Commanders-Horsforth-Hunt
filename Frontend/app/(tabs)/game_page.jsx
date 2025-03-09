@@ -1,7 +1,7 @@
 // game_page.jsx
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Image, StyleSheet, TouchableOpacity, Text, Modal, ActivityIndicator, Dimensions } from 'react-native';
+import { View, Image, StyleSheet, TouchableOpacity, Text, Modal, ActivityIndicator, Dimensions, Alert } from 'react-native';
 import { GestureHandlerRootView, GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
@@ -15,6 +15,7 @@ import { GetGameState } from '../../utils/API Functions/CheckGameState';
 import { getItem, setItem } from '../../utils/AsyncStorage';
 import { getPlayerDetails } from '../../utils/API Functions/GetPlayerDetail';
 import { GetPlayerMoveHistory } from '../../utils/API Functions/GetPlayerMoveHistory';
+import { MakeMove } from '../../utils/API Functions/MakeMove';
 import Grid from './grid';
 
 const { width, height } = Dimensions.get('window');
@@ -42,12 +43,13 @@ const MapViewer = () => {
   const [playerLocations, setPlayerLocations] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [boxesData, setBoxesData] = useState([]);
+  const [chosenTicket, setChosenTicket] = useState(null);
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const prevTranslationX = useSharedValue(0);
   const prevTranslationY = useSharedValue(0);
-  const mapID = 801;
+  const mapID = 1; //801;
 
   //Arefeen's Components Start
   const [ticketsModalVisible, setTicketsModalVisible] = useState(false);
@@ -63,17 +65,39 @@ const MapViewer = () => {
     filterTickets();
   };
 
-  const handleColorButtonPress = (color) => {
-    console.log(`${color} button pressed`);
+  const handleTicketButtonPress = (ticket) => {
+    console.log(`${ticket} button pressed`);
+    setChosenTicket(ticket);
     setTicketsModalVisible(false); // Close the tickets modal
   };
 
   //Arefeen Components End
   
   const saveLocation = async(locationID) => {
-    alert(`Location ${locationID} Pressed`)
-    await setItem('localLocationChoice', locationID)
-    console.log(await getItem('localLocationChoice'))
+    if (chosenTicket != null && locationID != null) {
+      let playerID;
+      let gameID 
+      try {
+      playerID = await getItem('localPlayerId')
+      gameID = await getItem('localGameID')
+      } catch (error) {
+        console.log("Error in retrieving local data");
+        return
+      }
+      try {
+      const makeMoveReturnBody = await MakeMove(playerID, gameID, chosenTicket, locationID)
+      if (makeMoveReturnBody.success) {
+        const makeMoveData = makeMoveReturnBody.data
+        Alert.alert(makeMoveData.message)
+      }
+      else {
+        console.log("Something has gone wrong with MakeMove ", makeMoveReturnBody.error)
+        return;
+      }
+      } catch (error) {
+        console.log("Error has occured: ", error)
+      }
+    }
   }
 
   // const getPlayerDetails = async() => {
@@ -224,7 +248,7 @@ const MapViewer = () => {
       const revealRounds = [3, 8, 13, 18, 24];
       const DrXDisplay = filterAndModifyData(filteredMoveHistory, revealRounds);
 
-      const defaultBoxes = Array.from({ length }, (_, index) => ({
+      const defaultBoxes = Array.from({ length  }, (_, index) => ({
         round: index + 1, // 1-based index
         ticket: null, // No ticket assigned yet
         text: '', // No text by default
@@ -236,12 +260,7 @@ const MapViewer = () => {
         return move ? move : defaultBox;
       });
 
-      console.log(mergedBoxes)
-
-
       setBoxesData(mergedBoxes);
-      return mergedBoxes;
-
       
     } catch (error) {
       console.log("Fetch Dr X Error")
@@ -366,8 +385,8 @@ const MapViewer = () => {
             animationType="slide"
             onRequestClose={() => setDrXModalVisible(false)}
           >
-            <View style={styles.modalOverlay}>
-              <View style={styles.drXModalContainer}>
+            <View style={styles.modalOverlay} onLayout={(event) =>console.log('Modal Overlay height:', event.nativeEvent.layout.height)}>
+              <View style={styles.drXModalContainer} onLayout={(event) =>console.log('Modal height:', event.nativeEvent.layout.height)}>
                 <TouchableOpacity
                   style={styles.closeButton}
                   onPress={() => setDrXModalVisible(false)}
@@ -375,9 +394,7 @@ const MapViewer = () => {
                   <Text style={styles.closeButtonText}>X</Text>
                 </TouchableOpacity>
                 <Text style={styles.modalTitle}>Dr X Movements</Text>
-                <View>
-                <Grid fetchDrXMoveHis={fetchDrXMoveHis} boxesData={boxesData} />
-                </View>
+                  <Grid fetchDrXMoveHis={fetchDrXMoveHis} boxesData={boxesData} />
               </View>
             </View>
           </Modal>
@@ -404,33 +421,12 @@ const MapViewer = () => {
                     <TouchableOpacity
                       style={[styles.colorButton, { backgroundColor: colourMapping[ticketType] || 'gray' }]}
                       key={ticketType}  // Ensure each button has a unique key
-                      onPress={() => handleColorButtonPress(ticketType)}  // Handle button press
+                      onPress={() => handleTicketButtonPress(ticketType)}  // Handle button press
                     >
                       <Text style={[styles.overlayButtonText, { color: textColourMapping[ticketType]}]}>{ticketType}</Text>
                       <Text style={[styles.overlayButtonText, { color: textColourMapping[ticketType]}]}>{count}</Text>
                     </TouchableOpacity>
-                  ))}
-                  {/*
-                  <TouchableOpacity
-                    style={[styles.colorButton, { backgroundColor: '#CDDBE7' }]}
-                    onPress={() => handleColorButtonPress('Blue')}
-                  >
-                    <Text style={styles.overlayButtonText}>Blue</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.colorButton, { backgroundColor: '#FF474C' }]}
-                    onPress={() => handleColorButtonPress('Red')}
-                  >
-                    <Text style={styles.overlayButtonText}>Red</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.colorButton, { backgroundColor: '#ADF802' }]}
-                    onPress={() => handleColorButtonPress('Green')}
-                  >
-                    <Text style={styles.overlayButtonText}>Green</Text>
-                  </TouchableOpacity>
-                  */}
-                  
+                  ))}                  
                 </View>
               </View>
             </View>
@@ -498,6 +494,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  gridContainer: {
+    flexGrow: 1,  // Allows it to expand
+    width: '100%',
+    minHeight: 100,  // Ensures it always has space
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   mapContainer: {
     position: 'relative',
@@ -576,9 +579,13 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 10,
     width: 200,
-    height: 600,
+    maxHeight: '80%',
+    flexGrow: 1,
     alignItems: 'center',
     position: 'relative', 
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   bottomModalContainer: {
     flex: 1,

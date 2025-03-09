@@ -1,33 +1,35 @@
-// Function used to create a lobby for players to join onto.
 export async function MakeMove(playerID, gameID, ticket, destination) {
+    const sendObj = { gameID: gameID, ticket: ticket, destination: destination };
+    console.log(sendObj);
 
-    // Creating variable for the response body
-    var responseData = null;
-
-    // Create Send Object & convert it to Json
-    const sendObj = { gameID, ticket, destination };
     const sendJSON = JSON.stringify(sendObj);
+    console.log(sendJSON);
 
-    // Making our connection 
-    const playerIDString = playerID.toString();
-    const url = 'http://trinity-developments.co.uk/players/' + playerIDString + '/moves/';
+    const url = `http://trinity-developments.co.uk/players/${playerID}/moves`;
+    console.log(url);
 
     try {
         const response = await fetch(url, {
-            method: 'GET',
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: sendJSON
         });
 
-        // Ensure we return and handle the response properly
+        console.log("Raw response:", response);
+
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        const data = await response.json();    
-        return { success: true, data };
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+            const data = await response.json();
+            return { success: true, data };
+        } else {
+            throw new Error("Invalid response format");
+        }
     } catch (error) {
-        console.error("Error adding game:", error);
-        return { success: false, error: error}
-}
+        console.error("Error making move:", error);
+        return { success: false, error };
+    }
 }

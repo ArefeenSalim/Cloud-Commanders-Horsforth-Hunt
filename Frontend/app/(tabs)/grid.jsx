@@ -1,7 +1,8 @@
 // Grid.js
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import PropTypes from 'prop-types';
 
 const colourMapping = {
   yellow: 'yellow',
@@ -34,8 +35,24 @@ const Grid = ({ fetchDrXMoveHis, boxesData }) => {
         );
       });
     };
+
+    // const withinList = () => {
+    //   return (
+    //     <FlatList
+    //     numColumns={3}
+    //     />
+    //   )
+    // }
   
-    return <View style={styles.gridContainer}>{renderBoxes()}</View>;
+    return (
+    <View style={styles.gridContainer}>
+      {renderBoxes()}
+    </View>
+    )}
+
+Grid.propTypes = {
+  fetchDrXMoveHis: PropTypes.func,
+  boxesData: PropTypes.object,
 }
 
 const styles = StyleSheet.create({
@@ -43,11 +60,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',  
     justifyContent: 'space-between',  
+    flex: 1,  // Allow it to resize properly
+    width: '100%',
+    height: '100%',
   },
   box: {
     width: '30%',  
-    height: 100,  
-    marginBottom: 10,  
+    flexGrow: 1,
+    height: 'fill',
+    marginBottom: 10,
+    marginRight: 5,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 5,
