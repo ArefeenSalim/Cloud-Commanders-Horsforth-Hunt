@@ -1,17 +1,27 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, ScrollView } from 'react-native'
 import { useRouter } from "expo-router";
 import { Link } from 'expo-router'
 import DynamicComponent from "../../utils/DynamicComponent";
+import { getItem } from "../../utils/AsyncStorage";
+import { startGame } from "../../utils/API Functions/PatchGameIDStart";
+import { GetGameState } from "../../utils/API Functions/CheckGameState";
+
+
 
 const ComponentContainer = () => {
+
+    const [repeat, setRepeat] = useState(1);
+
     const componentsData = [];
 
-    for (let i = 0; i < 5; i++) {
-        var player = ['apple', 'banana', 'orange', 'grapes', 'guava'];
-        var gameID = ['cake', 'chocolate', 'cookies', 'ice cream', 'cup cakes'];
-        componentsData[i] = {title: player[i], content: gameID[i], text: ""}
+    for (let i = 0; i < repeat; i++) {
+        var player = [{}, {}, {}, {}, {}];
+        var gameID = [{}, {}, {}, {}, {}];
+        
+        componentsData[i] = {title: player[i], content: gameID[i]}
     };
+
 
     return (
       <ScrollView>
@@ -25,8 +35,13 @@ const ComponentContainer = () => {
                 </View>
               ))}
           </View>
-          <View style={styles.button}>
-            <Text style={styles.refresh}>Refresh</Text>
+          <View style={styles.flex}>
+            <button style={styles.button} onClick={() => setRepeat(repeat + 1)}>
+              <Text style={styles.refresh}>Refresh</Text>
+            </button>
+            <button style={styles.button}>
+              <Text style={styles.refresh}>Start Game</Text>
+            </button>
           </View>
         </View>
       </View>
@@ -71,11 +86,19 @@ const styles = StyleSheet.create({
     },
     button: {
       backgroundColor: '#dddd91',
-      width: '100px',
-      height: '40px',
+      width: '150px',
+      height: '60px',
+      margin: '20px',
     },
     refresh: {
       color: '#000000',
       margin: 'auto',
+      fontSize: 20,
+      fontWeight: 'bold',
+    },
+    flex: {
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-evenly',
     }
 })
