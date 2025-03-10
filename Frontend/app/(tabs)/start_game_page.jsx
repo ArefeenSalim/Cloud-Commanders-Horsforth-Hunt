@@ -1,18 +1,28 @@
 import { View, Text, Image, StyleSheet, TextInput } from 'react-native'
 import { useRouter } from "expo-router";
 import React, { useState, useEffect } from 'react';
-import { Link } from 'expo-router'
+import { Link } from 'expo-router';
+import { setItem, getItem } from '../../utils/AsyncStorage'
 
 const router = useRouter(); // Get router instance
 const [text, setText] = useState('');
 
 export default function StartGamePage() {
-    let lobbyCode = "Sample Text";
+    const [lobbyID, setLobbyID] = useState('');
+    useEffect(() => {
+        const fetchLobbyID = async () => {
+          const storedID = await getItem('localGameID'); // Get the value from AsyncStorage
+          if (storedID) {
+            setLobbyID(storedID); // Set it to state
+          }
+        };
+        fetchLobbyID();
+    }, []);
     return (
 
         <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
             <Text style={styles.lobbyCodeText}>Lobby Code:</Text>
-            <text style={styles.lobbyCodeDisplay}>{lobbyCode}</text>
+            <text style={styles.lobbyCodeDisplay}>{lobbyID}</text>
             
             <Link href="/" style={styles.startGame}>
             <text style={styles.startGameText}>Start Game</text>
