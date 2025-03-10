@@ -1,25 +1,6 @@
 import { View, Text, Image, StyleSheet, TextInput, ActivityIndicator } from 'react-native'
-import { useRouter } from "expo-router";
+import { useRouter, Link } from "expo-router";
 import React, { useState, useEffect } from 'react';
-import { Link } from 'expo-router';
-<<<<<<< HEAD
-import { setItem, getItem } from '../../utils/AsyncStorage'
-
-const router = useRouter(); // Get router instance
-const [text, setText] = useState('');
-
-export default function StartGamePage() {
-    const [lobbyID, setLobbyID] = useState('');
-    useEffect(() => {
-        const fetchLobbyID = async () => {
-          const storedID = await getItem('localGameID'); // Get the value from AsyncStorage
-          if (storedID) {
-            setLobbyID(storedID); // Set it to state
-          }
-        };
-        fetchLobbyID();
-    }, []);
-=======
 import { getItem } from "../../utils/AsyncStorage";
 import { startGame } from "../../utils/API Functions/PatchGameIDStart";
 import { GetGameState } from "../../utils/API Functions/CheckGameState";
@@ -27,7 +8,6 @@ import { GetGameState } from "../../utils/API Functions/CheckGameState";
 export default function StartGamePage() {
     const router = useRouter(); // Get router instance
     const [text, setText] = useState('');
-    const [lobbyCode, setLobbyCode] = useState('Empty');
     const [lobbyData, setLobbyData] = useState(null);
 
     useEffect(() => {
@@ -57,16 +37,11 @@ export default function StartGamePage() {
         );
     }
 
->>>>>>> 84a2f2d2d2c166b08955dd300e06b659b969082d
     return (
 
         <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
             <Text style={styles.lobbyCodeText}>Lobby Code:</Text>
-<<<<<<< HEAD
-            <text style={styles.lobbyCodeDisplay}>{lobbyID}</text>
-=======
             <Text style={styles.lobbyCodeDisplay}>{lobbyData.gameId}</Text>
->>>>>>> 84a2f2d2d2c166b08955dd300e06b659b969082d
             
             <Link href="/" style={styles.startGame}>
             <Text style={styles.startGameText}>Start Game</Text>
