@@ -533,7 +533,6 @@ const MapViewer = () => {
                     ]}
                   />
                 ))}
-                <Text>BRUH</Text>
             </TouchableOpacity>
           ))}
 

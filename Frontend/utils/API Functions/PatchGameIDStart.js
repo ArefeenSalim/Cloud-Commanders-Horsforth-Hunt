@@ -29,4 +29,4 @@ const gameId = '181';  // Replace with actual game ID
 const playerId = '466';  // Replace with the player ID trying to start the game
 // const token = 'yourAccessToken';  // Replace with actual access token
 
-StartGame(gameId, playerId);
+// StartGame(gameId, playerId);
