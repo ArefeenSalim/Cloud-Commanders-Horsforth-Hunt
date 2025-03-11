@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, TextInput, Button, ScrollView, ActivityIndicator } from 'react-native'
 import { useRouter } from "expo-router";
 import { Link } from 'expo-router'
 import DynamicComponent from "../../utils/DynamicComponent";
@@ -11,16 +11,34 @@ import { GetGameState } from "../../utils/API Functions/CheckGameState";
 
 const ComponentContainer = () => {
 
-    const [repeat, setRepeat] = useState(1);
+    const [repeat, setRepeat] = useState(2);
 
-    const componentsData = [];
+    const [componentsData, setComponentsData] = useState([]);
 
-    for (let i = 0; i < repeat; i++) {
-        var player = [{}, {}, {}, {}, {}];
-        var gameID = [{}, {}, {}, {}, {}];
-        
-        componentsData[i] = {title: player[i], content: gameID[i]}
-    };
+    useEffect(() => {
+      const data = async() => {
+        const item = await getItem('localPlayerId');
+
+        for (let i = 0; i < repeat; i++) {
+          var player = [{}, {}, {}, {}, {}, {}];
+          var gameID = [{}, {}, {}, {}, {}, {}];
+          
+          componentsData[i] = {title: player[i], content: gameID[i]}
+      };
+      console.log(componentsData)
+      setComponentsData(componentsData)
+      }
+      data()
+    })
+
+  if (componentsData.length == 0) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#00ff00" />
+      </View>
+    );
+  }
+
 
 
     return (
