@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native'
-import { useRouter } from "expo-router";
-import { Link } from 'expo-router'
+import { View, Text, StyleSheet, TextInput, Button, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from 'react-native'
+import { Link, useRouter } from 'expo-router'
 import DynamicComponent from "../../utils/DynamicComponent";
 import { getItem } from "../../utils/AsyncStorage";
-import { startGame } from "../../utils/API Functions/PatchGameIDStart";
+import { StartGame } from "../../utils/API Functions/PatchGameIDStart";
 import { GetGameState } from "../../utils/API Functions/CheckGameState";
 
 
@@ -14,6 +13,22 @@ const ComponentContainer = () => {
     const [repeat, setRepeat] = useState(2);
     const [componentsData, setComponentsData] = useState([]);
     const [lobbyData, setLobbyData] = useState()
+    const router = useRouter(); // Get router instance
+
+    async function startGameButton() {
+      const localPlayerID = await getItem('localPlayerId')
+      const localGameID = await getItem('localGameID')
+      try {
+      if (String(localPlayerID) == String(lobbyData.players[0].playerId)) {
+        StartGame(localGameID, localPlayerID)
+      } else {
+        Alert.alert("Error Starting game")
+      }
+    } catch(error) {
+      Alert.alert("API Error")
+    }
+
+    }
 
     useEffect(() => {
       const intervalId = setInterval(async () => {
@@ -23,6 +38,10 @@ const ComponentContainer = () => {
             if (result.success) {
                 console.log(result.data);
                 setLobbyData(result.data);
+                if (result.data.status !== "Open" && result.data.status !== undefined) {
+                  console.log(result.data.status);
+                  router.navigate('/game_page');
+                }
             } else {
                 console.error('Error:', result.error);
             }
@@ -80,10 +99,10 @@ const ComponentContainer = () => {
               ))}
           </View>
           <View style={styles.flex}>
-            <TouchableOpacity style={styles.button} onClick={() => setRepeat(repeat + 1)}>
+            <TouchableOpacity style={styles.button}>
               <Text style={styles.refresh}>Refresh</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={startGameButton}>
               <Text style={styles.refresh}>Start Game</Text>
             </TouchableOpacity>
           </View>
