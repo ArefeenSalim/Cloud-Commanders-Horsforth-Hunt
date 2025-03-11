@@ -15,6 +15,21 @@ const ComponentContainer = () => {
     const [lobbyName, setLobbyName] = useState();
     const [targetPlayerId, settargetPlayerId] = useState(null);
 
+  const handleKick = async () => {
+    // Update the status message before executing the function
+    console.log("Handling Kick")
+
+    // Call the function that checks and potentially kicks the player
+    await checkAndKickPlayer(targetPlayerId);
+  };
+
+  if (lobbyData === null) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#00ff00" />
+      </View>
+    );
+  }
     const router = useRouter();
 
     const goBack = async () => {
