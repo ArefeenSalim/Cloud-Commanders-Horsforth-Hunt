@@ -4,8 +4,6 @@ import { useRouter } from "expo-router";
 import { Link } from 'expo-router'
 import { Image } from 'react-native';
 
-const router = useRouter(); // Get router instance
-
 
 export default function index() {
   return (

@@ -11,7 +11,7 @@ class KickPlayerResponse {
 }
 
 export async function kickPlayerDetail(playerId) {
-    const url = `https://example.com/players/${playerId}`; // Replace with actual API URL
+    const url = `http://trinity-developments.co.uk/players/${playerId}`; // Replace with actual API URL
     
     try {
         const response = await fetch(url, {
@@ -28,9 +28,9 @@ export async function kickPlayerDetail(playerId) {
             throw new Error(`Error: ${response.status} - ${await response.text()}`);
         }
     } catch (error) {
-        console.error("Error making game:", error);
+        console.error("Error kicking player:", error);
         return { success: false, error: error}
 }
 }
 // Example Usage:
-// kickPlayerDetail(201, "your_access_token_here").then(console.log).catch(console.error);
+//kickPlayerDetail(588).then(console.log).catch(console.error);

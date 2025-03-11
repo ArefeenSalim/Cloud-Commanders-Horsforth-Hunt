@@ -60,7 +60,7 @@ export async function AddPlayer(playerName, gameID) {
 
 // Example call
 
-// var returnData = AddPlayer("PapaJohn", 67)
+// var returnData = AddPlayer("targetToKick", 239)
 //     .then(response => console.log(response))
 //     .catch(error => console.error(error));
 
