@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from 'react-native'
 import { Link, useRouter } from 'expo-router'
-import { getItem } from "../../utils/AsyncStorage";
+import { getItem, clear } from "../../utils/AsyncStorage";
 import { StartGame } from "../../utils/API Functions/PatchGameIDStart";
 import { GetGameState } from "../../utils/API Functions/CheckGameState";
 import { getOpenGames } from '../../utils/API Functions/GetGame';
-import { checkAndKickPlayer } from "../../utils/KickPlayer";
 
 
 
@@ -16,29 +15,16 @@ const ComponentContainer = () => {
     const [lobbyName, setLobbyName] = useState();
     const [targetPlayerId, settargetPlayerId] = useState(null);
 
-  const handleKick = async () => {
-    // Update the status message before executing the function
-    setStatus('Checking and attempting to kick the player...');
+    const router = useRouter();
 
-    // Call the function that checks and potentially kicks the player
-    await checkAndKickPlayer(targetPlayerId);
-
-    // Update the status message after execution
-    setStatus('Check completed. See console logs for details.');
-  };
-
-  if (lobbyData === null) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#00ff00" />
-      </View>
-    );
-  }
+    const goBack = async () => {
+      await close()
+      router.navigate('/index')
+    }
 
     const handleTargetPlayer = (playerId) => {
       settargetPlayerId(playerId)
     }
-    const router = useRouter(); // Get router instance
 
     async function startGameButton() {
       const localPlayerID = await getItem('localPlayerId')
@@ -125,6 +111,7 @@ const ComponentContainer = () => {
     return (
       <ScrollView>
       <View style={styles.container}>
+        <TouchableOpacity onPress={goBack}><Text>""</Text></TouchableOpacity>
         <Text style={styles.text}>Lobby Name: {lobbyName}</Text>
         <Text style={styles.text}>Game ID: {lobbyData.gameId}</Text>
         <View style={styles.view}>
