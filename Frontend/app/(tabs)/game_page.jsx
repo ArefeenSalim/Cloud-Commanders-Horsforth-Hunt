@@ -51,7 +51,7 @@ const MapViewer = () => {
   const translateY = useSharedValue(0);
   const prevTranslationX = useSharedValue(0);
   const prevTranslationY = useSharedValue(0);
-  const mapID = 1; //801;
+  const mapID = 801; //801;
 
   //Arefeen's Components Start
   const [ticketsModalVisible, setTicketsModalVisible] = useState(false);
@@ -268,6 +268,28 @@ const MapViewer = () => {
     }));
   };
 
+  function adjustRounds(moves) {
+    let roundMap = new Map(); // Stores the next available round for each seen round
+    
+    // Process moves to adjust rounds
+    let adjustedMoves = moves.map((move) => {
+      let { round } = move;
+  
+      // If this round was seen before, increase it
+      while (roundMap.has(round)) {
+        round++; // Move it to the next available round
+      }
+  
+      // Store the new round so that future moves don't overlap
+      roundMap.set(round, true);
+  
+      // Return updated move with adjusted round
+      return { ...move, round };
+    });
+  
+    return adjustedMoves;
+  }
+
   const fetchDrXMoveHis = useCallback(async () => {
     try {
       const gameID = await getItem('localGameID');
@@ -280,7 +302,8 @@ const MapViewer = () => {
       const filteredMoveHistory = filterData(moveHistory);
 
       const revealRounds = [3, 8, 13, 18, 24];
-      const DrXDisplay = filterAndModifyData(filteredMoveHistory, revealRounds);
+      const reformatDoubleMoves = adjustRounds(filteredMoveHistory);
+      const DrXDisplay = filterAndModifyData(reformatDoubleMoves, revealRounds);
 
       const defaultBoxes = Array.from({ length  }, (_, index) => ({
         round: index + 1, // 1-based index
@@ -510,7 +533,6 @@ const MapViewer = () => {
                     ]}
                   />
                 ))}
-                <Text>BRUH</Text>
             </TouchableOpacity>
           ))}
 

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Platform } from 'react-native'
 import { useRouter, Link } from "expo-router";
 import React, { useState } from 'react';
 import { setItem } from '../../utils/AsyncStorage'; 
@@ -42,9 +42,9 @@ export default function LobbyCodePage() {
     
     <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
       <Text style={styles.lobbyText}>Enter Lobby ID Here:</Text>
-      <TouchableOpacity onPress={() => saveLobbyID(text)} style={styles.JoinButton}>
+      <Link href="start_game_page" onPress={() => saveLobbyID(text)} style={styles.JoinButton}>
       <Text style={styles.joinButtonText}>Join Game</Text>
-      </TouchableOpacity>
+      </Link>
     <TextInput
       style={styles.textBox}
       placeholder=""

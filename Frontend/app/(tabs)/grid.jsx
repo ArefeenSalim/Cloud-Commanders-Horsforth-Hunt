@@ -38,7 +38,7 @@ const Grid = ({ fetchDrXMoveHis, boxesData }) => {
 
         return (
           <TouchableOpacity
-            key={box.round}
+            key={box.moveId}
             style={[styles.box, { backgroundColor }]}
           >
             <Text style={[styles.boxText, {color: textColour}]}>{box.round}</Text>

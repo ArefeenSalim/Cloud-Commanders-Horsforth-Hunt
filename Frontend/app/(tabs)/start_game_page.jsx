@@ -1,21 +1,50 @@
-import { View, Text, Image, StyleSheet, TextInput } from 'react-native'
-import { useRouter } from "expo-router";
+import { View, Text, Image, StyleSheet, TextInput, ActivityIndicator } from 'react-native'
+import { useRouter, Link } from "expo-router";
 import React, { useState, useEffect } from 'react';
-import { Link } from 'expo-router'
-
-const router = useRouter(); // Get router instance
-const [text, setText] = useState('');
+import { getItem } from "../../utils/AsyncStorage";
+import { startGame } from "../../utils/API Functions/PatchGameIDStart";
+import { GetGameState } from "../../utils/API Functions/CheckGameState";
 
 export default function StartGamePage() {
-    let lobbyCode = "Sample Text";
+    const router = useRouter(); // Get router instance
+    const [text, setText] = useState('');
+    const [lobbyData, setLobbyData] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+          try {
+            const localGameID = await getItem('localGameID')
+            const result = await GetGameState(localGameID);
+            if (result.success) {
+                console.log(result.data);
+                setLobbyData(result.data);
+            } else {
+                console.error('Error:', result.error);
+            }
+          } catch (error) {
+                console.error('Fetch error:', error);
+          }
+        };
+    
+        fetchData();
+      }, []);
+
+    if (lobbyData === null) {
+        return (
+            <View style={styles.container}>
+                <ActivityIndicator size="large" color="#00ff00" />
+            </View>
+        );
+    }
+
     return (
 
         <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
             <Text style={styles.lobbyCodeText}>Lobby Code:</Text>
-            <text style={styles.lobbyCodeDisplay}>{lobbyCode}</text>
+            <Text style={styles.lobbyCodeDisplay}>{lobbyData.gameId}</Text>
             
             <Link href="/" style={styles.startGame}>
-            <text style={styles.startGameText}>Start Game</text>
+            <Text style={styles.startGameText}>Start Game</Text>
             </Link>
         </View>
     )

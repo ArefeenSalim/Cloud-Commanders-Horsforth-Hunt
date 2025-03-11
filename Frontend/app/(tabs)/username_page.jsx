@@ -10,7 +10,7 @@ const [text, setText] = useState('');
 
 export default function UsernamePage() {
     const [text, setText] = useState('');
-    const mapNumb = 1;
+    const mapNumb = 801;
     let returnData;
 
     const InitLobby = async (username) => {
@@ -48,7 +48,7 @@ export default function UsernamePage() {
       
                 await setItem('localPlayerId', returnData.playerId);
                 
-                router.navigate('/lobby');
+                router.navigate('/start_game_page');
             } else {
                 console.error('Error:', addResult.error)
                 Alert.alert('Error', addResult.error)
