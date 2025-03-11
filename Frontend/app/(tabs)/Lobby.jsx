@@ -12,24 +12,39 @@ import { GetGameState } from "../../utils/API Functions/CheckGameState";
 const ComponentContainer = () => {
 
     const [repeat, setRepeat] = useState(2);
-
     const [componentsData, setComponentsData] = useState([]);
+    const [lobbyData, setLobbyData] = useState()
 
     useEffect(() => {
-      const data = async() => {
-        const item = await getItem('localPlayerId');
+      const intervalId = setInterval(async () => {
+          try {
+            const localGameID = await getItem('localGameID')
+            const result = await GetGameState(localGameID);
+            if (result.success) {
+                console.log(result.data);
+                setLobbyData(result.data);
+            } else {
+                console.error('Error:', result.error);
+            }
+          } catch (error) {
+                console.error('Fetch error:', error);
+          }
+        }, 5000);
 
-        for (let i = 0; i < repeat; i++) {
-          var player = [{}, {}, {}, {}, {}, {}];
-          var gameID = [{}, {}, {}, {}, {}, {}];
-          
-          componentsData[i] = {title: player[i], content: gameID[i]}
-      };
-      console.log(componentsData)
-      setComponentsData(componentsData)
-      }
-      data()
-    })
+        return () => clearInterval(intervalId)
+      }, []);
+
+  useEffect(() => {
+    const data = async () => {
+      const settingData = lobbyData.players.map(playerInfo => ({
+        title: playerInfo.playerName,
+        content: playerInfo.colour,
+      }))
+      console.log(settingData)
+      setComponentsData(settingData);
+    }
+    data()
+  }, [lobbyData]);
 
   if (componentsData.length == 0) {
     return (
