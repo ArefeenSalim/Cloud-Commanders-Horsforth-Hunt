@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from 'react-native'
 import { Link, useRouter } from 'expo-router'
-import DynamicComponent from "../../utils/DynamicComponent";
 import { getItem } from "../../utils/AsyncStorage";
 import { StartGame } from "../../utils/API Functions/PatchGameIDStart";
 import { GetGameState } from "../../utils/API Functions/CheckGameState";
@@ -106,7 +105,7 @@ const ComponentContainer = () => {
                               <Text style={styles.text}>{data.content}</Text>
                               <Text style={styles.h2}>Player ID</Text>
                               <Text style={styles.text}>{data.playerId}</Text>
-                              <TouchableOpacity onPress={handleTargetPlayer(data.playerId)}><Text>Select Player</Text></TouchableOpacity>
+                              <TouchableOpacity onPress={() => handleTargetPlayer(data.playerId)}><Text>Select Player</Text></TouchableOpacity>
                           
                 </View>
               ))}
