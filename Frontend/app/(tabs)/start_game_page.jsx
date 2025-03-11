@@ -24,8 +24,6 @@ export default function StartGamePage() {
             } else {
                 console.error('Error:', result.error);
             }
-            // Testing purposes
-            setTargetPlayerId(588);
           } catch (error) {
                 console.error('Fetch error:', error);
           }
