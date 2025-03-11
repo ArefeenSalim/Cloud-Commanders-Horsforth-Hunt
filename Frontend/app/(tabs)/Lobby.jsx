@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, ScrollView, ActivityIndicator } from 'react-native'
+import { View, Text, StyleSheet, TextInput, Button, ScrollView, ActivityIndicator, TouchableOpacity } from 'react-native'
 import { useRouter } from "expo-router";
 import { Link } from 'expo-router'
 import DynamicComponent from "../../utils/DynamicComponent";
@@ -70,6 +70,7 @@ const ComponentContainer = () => {
       <ScrollView>
       <View style={styles.container}>
         <Text style={styles.text}>Multiplayer Lobby Page</Text>
+        <Text style={styles.text}>{setLobbyData.gameId}</Text>
         <View style={styles.view}>
           <View style={styles.h2}>
               {componentsData.map((data, index) => (
@@ -79,12 +80,12 @@ const ComponentContainer = () => {
               ))}
           </View>
           <View style={styles.flex}>
-            <button style={styles.button} onClick={() => setRepeat(repeat + 1)}>
+            <TouchableOpacity style={styles.button} onClick={() => setRepeat(repeat + 1)}>
               <Text style={styles.refresh}>Refresh</Text>
-            </button>
-            <button style={styles.button}>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
               <Text style={styles.refresh}>Start Game</Text>
-            </button>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -115,23 +116,23 @@ const styles = StyleSheet.create({
         height: 'auto',
         flexDirection: 'column',
         justifyContent: 'space-evenly',
-        padding: '20px',
+        padding: 20,
         margin: 'auto',
-        marginVertical: '50px',
-        borderWidth: '5px',
+        marginVertical: 50,
+        borderWidth: 5,
         borderColor: '#dddd91',
     },
     section: {
       backgroundColor: '#444444',
-      borderWidth: '3px',
+      borderWidth: 3,
       borderColor: '#dddd91',
-      margin: '10px',
+      margin: 10,
     },
     button: {
       backgroundColor: '#dddd91',
-      width: '150px',
-      height: '60px',
-      margin: '20px',
+      width: 150,
+      height: 60,
+      margin: 20,
     },
     refresh: {
       color: '#000000',
