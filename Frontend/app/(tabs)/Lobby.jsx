@@ -105,12 +105,12 @@ const ComponentContainer = () => {
     return (
       <ScrollView>
       <View style={styles.container}>
-        <Text style={styles.text}>{lobbyName}</Text>
-        <Text style={styles.text}>{lobbyData.gameId}</Text>
+        <Text style={styles.text}>Lobby Name: {lobbyName}</Text>
+        <Text style={styles.text}>Game ID: {lobbyData.gameId}</Text>
         <View style={styles.view}>
           <View style={styles.h2}>
               {componentsData.map((data) => (
-                <View style={styles.section} key={data.playerId}>
+                <View style={[styles.section, {borderColor: data.content.toLowerCase() === "clear" ? "grey" : data.content.toLowerCase()}]} key={data.playerId}>
                   <Text style={styles.titles}>Player</Text>
                   <Text style={styles.text}>{data.title}</Text>
                   <Text style={styles.titles}>Colour</Text>
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     section: {
       backgroundColor: '#444444',
       width: 275,
-      borderWidth: 3,
+      borderWidth: 5,
       borderColor: '#dddd91',
       margin: '5%',
     },
@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
       width: '20%',
       height: 60,
       margin: 20,
+      borderRadius: 10,
     },
     refresh: {
       color: '#000000',
