@@ -123,8 +123,8 @@ const ComponentContainer = () => {
               
           </View>
           <View style={styles.flex}>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.refresh}>Refresh</Text>
+            <TouchableOpacity style={styles.button} onPress={handleKick}>
+              <Text style={styles.refresh}>Kick Player</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={startGameButton}>
               <Text style={styles.refresh}>Start Game</Text>
