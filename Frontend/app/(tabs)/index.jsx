@@ -31,9 +31,6 @@ export default function index() {
     <Link href="/map" style={styles.button}>
         <Text style={styles.buttonText}>Map page (TESTING)</Text>
     </Link>
-    <Link href="/arefeenmap" style={styles.button}>
-        <Text style={styles.buttonText}>Arefeen Map page (TESTING)</Text>
-    </Link>
     </View>
     </View>
   )
