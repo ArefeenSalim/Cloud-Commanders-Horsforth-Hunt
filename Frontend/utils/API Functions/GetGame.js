@@ -18,7 +18,7 @@ export const getOpenGames = async () => {
     const data = await response.json();
 
     // Log the full response data to the console
-    console.log('Full response data:', data);
+    // console.log('Full response data:', data);
 
     // Extract the games data from the response
     const games = data.games;
