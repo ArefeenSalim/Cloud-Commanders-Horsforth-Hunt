@@ -5,6 +5,7 @@ import { getItem } from "../../utils/AsyncStorage";
 import { StartGame } from "../../utils/API Functions/PatchGameIDStart";
 import { GetGameState } from "../../utils/API Functions/CheckGameState";
 import { getOpenGames } from '../../utils/API Functions/GetGame';
+import { checkAndKickPlayer } from "../../utils/KickPlayer";
 
 
 
@@ -14,6 +15,25 @@ const ComponentContainer = () => {
     const [lobbyData, setLobbyData] = useState();
     const [lobbyName, setLobbyName] = useState();
     const [targetPlayerId, settargetPlayerId] = useState(null);
+
+  const handleKick = async () => {
+    // Update the status message before executing the function
+    setStatus('Checking and attempting to kick the player...');
+
+    // Call the function that checks and potentially kicks the player
+    await checkAndKickPlayer(targetPlayerId);
+
+    // Update the status message after execution
+    setStatus('Check completed. See console logs for details.');
+  };
+
+  if (lobbyData === null) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#00ff00" />
+      </View>
+    );
+  }
 
     const handleTargetPlayer = (playerId) => {
       settargetPlayerId(playerId)
