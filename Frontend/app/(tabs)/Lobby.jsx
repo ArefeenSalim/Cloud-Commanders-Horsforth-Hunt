@@ -18,13 +18,10 @@ const ComponentContainer = () => {
 
   const handleKick = async () => {
     // Update the status message before executing the function
-    setStatus('Checking and attempting to kick the player...');
+    console.log("Handling Kick")
 
     // Call the function that checks and potentially kicks the player
     await checkAndKickPlayer(targetPlayerId);
-
-    // Update the status message after execution
-    setStatus('Check completed. See console logs for details.');
   };
 
   if (lobbyData === null) {
