@@ -98,17 +98,16 @@ const ComponentContainer = () => {
           <View style={styles.h2}>
               {componentsData.map((data) => (
                 <View style={styles.section} key={data.playerId}>
-                          
-                              <Text style={styles.h2}>Player</Text>
-                              <Text style={styles.text}>{data.title}</Text>
-                              <Text style={styles.h2}>Colour</Text>
-                              <Text style={styles.text}>{data.content}</Text>
-                              <Text style={styles.h2}>Player ID</Text>
-                              <Text style={styles.text}>{data.playerId}</Text>
-                              <TouchableOpacity onPress={() => handleTargetPlayer(data.playerId)}><Text>Select Player</Text></TouchableOpacity>
-                          
+                  <Text style={styles.titles}>Player</Text>
+                  <Text style={styles.text}>{data.title}</Text>
+                  <Text style={styles.titles}>Colour</Text>
+                  <Text style={styles.text}>{data.content}</Text>
+                  <Text style={styles.titles}>Player ID</Text>
+                  <Text style={styles.text}>{data.playerId}</Text>
+                  <TouchableOpacity style={styles.selectPlayer} onPress={() => handleTargetPlayer(data.playerId)}><Text style={styles.text2}>Select Player</Text></TouchableOpacity>
                 </View>
               ))}
+              
           </View>
           <View style={styles.flex}>
             <TouchableOpacity style={styles.button}>
@@ -127,6 +126,18 @@ const ComponentContainer = () => {
 export default ComponentContainer;
 
 const styles = StyleSheet.create({
+    text2: {
+      margin: 'auto',
+      fontWeight: 'bold',
+    },
+    selectPlayer: {
+      backgroundColor: '#9977ff',
+      marginHorizontal: 'auto',
+      marginVertical: 20,
+      width: '75%',
+      height: 40,
+      borderRadius: 5,
+    },
     container: {
       backgroundColor: '#000000',
       width: '100%',
@@ -138,8 +149,11 @@ const styles = StyleSheet.create({
       color: '#dddd91'
     },
     h2: {
-        fontSize: 7,
-        backgroundColor: '#777777',
+      flexDirection: 'row',
+      justifyContent: 'space-evenly',
+      fontSize: 7,
+      backgroundColor: '#777777',
+      flexWrap: 'wrap',
     },
     view: {
         backgroundColor: '#444444',
@@ -155,20 +169,29 @@ const styles = StyleSheet.create({
     },
     section: {
       backgroundColor: '#444444',
+      width: 275,
       borderWidth: 3,
       borderColor: '#dddd91',
-      margin: 10,
+      margin: '5%',
     },
     button: {
       backgroundColor: '#dddd91',
-      width: 150,
+      width: '20%',
       height: 60,
       margin: 20,
     },
     refresh: {
       color: '#000000',
       margin: 'auto',
-      fontSize: 20,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    titles: {
+      backgroundColor: '#dddd91',
+      width: '100%',
+      color: '#000000',
+      margin: 'auto',
+      fontSize: 16,
       fontWeight: 'bold',
     },
     flex: {
