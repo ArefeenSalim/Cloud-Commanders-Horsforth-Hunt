@@ -209,12 +209,15 @@ const MapViewer = () => {
             default: { x: 0, y: 0 },
           };
 
+          const defaultOffset = {x: 0, y:-40}
+
 
           // Create a new array with updated player positions
           const updatedPlayers = gameState.data.players.map((player, i) => {
             const locationIndex = player.location - 1;
 
-            const offset = colourOffsets[player.colour] || colourOffsets.default;
+            //const offset = colourOffsets[player.colour] || colourOffsets.default;
+            const offset = defaultOffset;
 
             return {
               ...player, // Copy existing player data
