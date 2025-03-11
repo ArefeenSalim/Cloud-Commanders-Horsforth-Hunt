@@ -48,7 +48,7 @@ export default function UsernamePage() {
       
                 await setItem('localPlayerId', returnData.playerId);
                 
-                router.navigate('/start_game_page');
+                router.navigate('/Lobby');
             } else {
                 console.error('Error:', addResult.error)
                 Alert.alert('Error', addResult.error)
