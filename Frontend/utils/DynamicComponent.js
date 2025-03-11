@@ -7,8 +7,11 @@ const DynamicComponent = (props) => {
             <h1>Player</h1>
             <textarea>{props.title}</textarea>
             <br></br>
-            <h1>Game ID</h1>
+            <h1>Colour</h1>
             <textarea>{props.content}</textarea>
+            <br></br>
+            <h1>Player ID</h1>
+            <textarea>{props.playerId}</textarea>
         </div>
     );
 };

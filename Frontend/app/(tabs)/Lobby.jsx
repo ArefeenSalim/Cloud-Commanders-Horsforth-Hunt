@@ -36,17 +36,27 @@ const ComponentContainer = () => {
 
   useEffect(() => {
     const data = async () => {
-      const settingData = lobbyData.players.map(playerInfo => ({
+      try {
+      const playerLobbyData = lobbyData.players;
+      if (!(playerLobbyData == null || playerLobbyData == undefined)) {
+      console.log('this is the player output', lobbyData.players)
+      const settingData = playerLobbyData.map(playerInfo => ({
         title: playerInfo.playerName,
         content: playerInfo.colour,
+        playerId: playerInfo.playerId
       }))
       console.log(settingData)
       setComponentsData(settingData);
+    } else { 
+      console.log('lobby still loading')}
+    } catch (error) {
+      console.log("Error with player data loading: ", error)
     }
+  }
     data()
   }, [lobbyData]);
 
-  if (componentsData.length == 0) {
+  if (componentsData.length == 0 && (lobbyData == null || lobbyData == undefined)) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#00ff00" />
