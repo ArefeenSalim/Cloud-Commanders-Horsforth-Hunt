@@ -1,19 +1,60 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, ScrollView, ActivityIndicator } from 'react-native'
-import { useRouter } from "expo-router";
-import { Link } from 'expo-router'
-import DynamicComponent from "../../utils/DynamicComponent";
-import { getItem } from "../../utils/AsyncStorage";
-import { startGame } from "../../utils/API Functions/PatchGameIDStart";
+import { View, Text, StyleSheet, TextInput, Button, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from 'react-native'
+import { Link, useRouter } from 'expo-router'
+import { getItem, clear } from "../../utils/AsyncStorage";
+import { StartGame } from "../../utils/API Functions/PatchGameIDStart";
 import { GetGameState } from "../../utils/API Functions/CheckGameState";
+import { getOpenGames } from '../../utils/API Functions/GetGame';
 
 
 
 const ComponentContainer = () => {
 
-    const [repeat, setRepeat] = useState(2);
     const [componentsData, setComponentsData] = useState([]);
-    const [lobbyData, setLobbyData] = useState()
+    const [lobbyData, setLobbyData] = useState();
+    const [lobbyName, setLobbyName] = useState();
+    const [targetPlayerId, settargetPlayerId] = useState(null);
+
+  const handleKick = async () => {
+    // Update the status message before executing the function
+    console.log("Handling Kick")
+
+    // Call the function that checks and potentially kicks the player
+    await checkAndKickPlayer(targetPlayerId);
+  };
+
+  if (lobbyData === null) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#00ff00" />
+      </View>
+    );
+  }
+    const router = useRouter();
+
+    const goBack = async () => {
+      await close()
+      router.navigate('/index')
+    }
+
+    const handleTargetPlayer = (playerId) => {
+      settargetPlayerId(playerId)
+    }
+
+    async function startGameButton() {
+      const localPlayerID = await getItem('localPlayerId')
+      const localGameID = await getItem('localGameID')
+      try {
+      if (String(localPlayerID) == String(lobbyData.players[0].playerId)) {
+        StartGame(localGameID, localPlayerID)
+      } else {
+        Alert.alert("Error Starting game")
+      }
+    } catch(error) {
+      Alert.alert("API Error")
+    }
+
+    }
 
     useEffect(() => {
       const intervalId = setInterval(async () => {
@@ -23,6 +64,22 @@ const ComponentContainer = () => {
             if (result.success) {
                 console.log(result.data);
                 setLobbyData(result.data);
+                if (result.data.status !== "Open" && result.data.status !== undefined) {
+                  console.log(result.data.status);
+                  router.navigate('/game_page');
+                }
+                const gameCheck = await getOpenGames();
+                if (gameCheck.success) {
+                  const gameData = gameCheck.data.games
+                for (const element of gameData) {
+                  if (String(element.gameId) == String(localGameID)){
+                    setLobbyName(element.gameName)
+                  }
+                }
+              }
+              else {
+                console.error('Error:', result.error);
+              }
             } else {
                 console.error('Error:', result.error);
             }
@@ -36,17 +93,27 @@ const ComponentContainer = () => {
 
   useEffect(() => {
     const data = async () => {
-      const settingData = lobbyData.players.map(playerInfo => ({
+      try {
+      const playerLobbyData = lobbyData.players;
+      if (!(playerLobbyData == null || playerLobbyData == undefined)) {
+      console.log('this is the player output', lobbyData.players)
+      const settingData = playerLobbyData.map(playerInfo => ({
         title: playerInfo.playerName,
         content: playerInfo.colour,
+        playerId: playerInfo.playerId
       }))
       console.log(settingData)
       setComponentsData(settingData);
+    } else { 
+      console.log('lobby still loading')}
+    } catch (error) {
+      console.log("Error with player data loading: ", error)
     }
+  }
     data()
   }, [lobbyData]);
 
-  if (componentsData.length == 0) {
+  if (componentsData.length == 0 && (lobbyData == null || lobbyData == undefined)) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#00ff00" />
@@ -59,22 +126,31 @@ const ComponentContainer = () => {
     return (
       <ScrollView>
       <View style={styles.container}>
-        <Text style={styles.text}>Multiplayer Lobby Page</Text>
+        <TouchableOpacity onPress={goBack}><Text>""</Text></TouchableOpacity>
+        <Text style={styles.text}>Lobby Name: {lobbyName}</Text>
+        <Text style={styles.text}>Game ID: {lobbyData.gameId}</Text>
         <View style={styles.view}>
           <View style={styles.h2}>
-              {componentsData.map((data, index) => (
-                <View style={styles.section}>
-                  <DynamicComponent key={index} {...data} />
+              {componentsData.map((data) => (
+                <View style={[styles.section, {borderColor: data.content.toLowerCase() === "clear" ? "grey" : data.content.toLowerCase()}]} key={data.playerId}>
+                  <Text style={styles.titles}>Player</Text>
+                  <Text style={styles.text}>{data.title}</Text>
+                  <Text style={styles.titles}>Colour</Text>
+                  <Text style={styles.text}>{data.content}</Text>
+                  <Text style={styles.titles}>Player ID</Text>
+                  <Text style={styles.text}>{data.playerId}</Text>
+                  <TouchableOpacity style={styles.selectPlayer} onPress={() => handleTargetPlayer(data.playerId)}><Text style={styles.text2}>Select Player</Text></TouchableOpacity>
                 </View>
               ))}
+              
           </View>
           <View style={styles.flex}>
-            <button style={styles.button} onClick={() => setRepeat(repeat + 1)}>
-              <Text style={styles.refresh}>Refresh</Text>
-            </button>
-            <button style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={handleKick}>
+              <Text style={styles.refresh}>Kick Player</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={startGameButton}>
               <Text style={styles.refresh}>Start Game</Text>
-            </button>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -85,6 +161,18 @@ const ComponentContainer = () => {
 export default ComponentContainer;
 
 const styles = StyleSheet.create({
+    text2: {
+      margin: 'auto',
+      fontWeight: 'bold',
+    },
+    selectPlayer: {
+      backgroundColor: '#9977ff',
+      marginHorizontal: 'auto',
+      marginVertical: 20,
+      width: '75%',
+      height: 40,
+      borderRadius: 5,
+    },
     container: {
       backgroundColor: '#000000',
       width: '100%',
@@ -96,8 +184,11 @@ const styles = StyleSheet.create({
       color: '#dddd91'
     },
     h2: {
-        fontSize: 7,
-        backgroundColor: '#777777',
+      flexDirection: 'row',
+      justifyContent: 'space-evenly',
+      fontSize: 7,
+      backgroundColor: '#777777',
+      flexWrap: 'wrap',
     },
     view: {
         backgroundColor: '#444444',
@@ -105,28 +196,38 @@ const styles = StyleSheet.create({
         height: 'auto',
         flexDirection: 'column',
         justifyContent: 'space-evenly',
-        padding: '20px',
+        padding: 20,
         margin: 'auto',
-        marginVertical: '50px',
-        borderWidth: '5px',
+        marginVertical: 50,
+        borderWidth: 5,
         borderColor: '#dddd91',
     },
     section: {
       backgroundColor: '#444444',
-      borderWidth: '3px',
+      width: 275,
+      borderWidth: 5,
       borderColor: '#dddd91',
-      margin: '10px',
+      margin: '5%',
     },
     button: {
       backgroundColor: '#dddd91',
-      width: '150px',
-      height: '60px',
-      margin: '20px',
+      width: '20%',
+      height: 60,
+      margin: 20,
+      borderRadius: 10,
     },
     refresh: {
       color: '#000000',
       margin: 'auto',
-      fontSize: 20,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    titles: {
+      backgroundColor: '#dddd91',
+      width: '100%',
+      color: '#000000',
+      margin: 'auto',
+      fontSize: 16,
       fontWeight: 'bold',
     },
     flex: {

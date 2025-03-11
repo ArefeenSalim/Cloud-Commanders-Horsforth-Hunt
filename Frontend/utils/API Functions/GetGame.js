@@ -18,7 +18,7 @@ export const getOpenGames = async () => {
     const data = await response.json();
 
     // Log the full response data to the console
-    console.log('Full response data:', data);
+    // console.log('Full response data:', data);
 
     // Extract the games data from the response
     const games = data.games;
@@ -52,13 +52,13 @@ export const getOpenGames = async () => {
 };
 
 // Call the function to get and display open games
-await getOpenGames()
-.then((result) => {
-  if (result.success) {
-      console.log('JSON Data:', result.data);
-      const returnData = result.data;
-      console.log(returnData);
-  } else {
-      console.error('Error:', result.error)
-  }
-});
+// await getOpenGames()
+// .then((result) => {
+//   if (result.success) {
+//       console.log('JSON Data:', result.data);
+//       const returnData = result.data;
+//       console.log(returnData);
+//   } else {
+//       console.error('Error:', result.error)
+//   }
+// });

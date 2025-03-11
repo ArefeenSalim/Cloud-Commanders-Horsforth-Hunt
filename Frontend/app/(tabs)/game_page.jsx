@@ -522,11 +522,11 @@ const MapViewer = () => {
                 })
                 .map((playerLoc) => (
                   <View
-                    key={playerLoc.id} // ✅ Unique key per player
+                    key={playerLoc.id}
                     style={[
                       styles.circle,
                       {
-                        left: playerLoc.xPos, // ✅ Apply offset instead of absolute positioning
+                        left: playerLoc.xPos,
                         top: playerLoc.yPos,
                         backgroundColor: playerLoc.colour.toLowerCase() === "clear" ? "purple" : playerLoc.colour.toLowerCase(),
                       },
