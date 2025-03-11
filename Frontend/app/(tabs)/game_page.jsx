@@ -16,6 +16,7 @@ import { getItem, setItem } from '../../utils/AsyncStorage';
 import { getPlayerDetails } from '../../utils/API Functions/GetPlayerDetail';
 import { GetPlayerMoveHistory } from '../../utils/API Functions/GetPlayerMoveHistory';
 import { MakeMove } from '../../utils/API Functions/MakeMove';
+import { checkAndKickPlayer } from '../../utils/KickPlayer';
 import Grid from './grid';
 
 const { width, height } = Dimensions.get('window');
@@ -56,7 +57,32 @@ const MapViewer = () => {
   //Arefeen's Components Start
   const [ticketsModalVisible, setTicketsModalVisible] = useState(false);
   const [drXModalVisible, setDrXModalVisible] = useState(false);
-  
+
+  const handleKick = async (targetPlayerId, playerName) => {
+    // Confirm wish to kick
+    Alert.alert(
+      `Kick Player ${playerName}`,
+      'Are you sure you want to kick?',
+      [
+        {
+          text: 'Yes',
+          onPress: await checkAndKickPlayer(targetPlayerId),
+          style: 'destructive'
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ],
+      {
+        cancelable: true,
+      },
+    )
+
+    // Call the function that checks and potentially kicks the player
+    // await checkAndKickPlayer(targetPlayerId);
+  };
+
   const handlePress1 = () => {
     setDrXModalVisible(true); // Show Dr X modal
     fetchDrXMoveHis();
@@ -74,30 +100,30 @@ const MapViewer = () => {
   };
 
   //Arefeen Components End
-  
-  const saveLocation = async(locationID) => {
+
+  const saveLocation = async (locationID) => {
     if (chosenTicket != null && locationID != null) {
       let playerID;
-      let gameID 
+      let gameID
       try {
-      playerID = await getItem('localPlayerId')
-      gameID = await getItem('localGameID')
+        playerID = await getItem('localPlayerId')
+        gameID = await getItem('localGameID')
       } catch (error) {
         console.log("Error in retrieving local data");
         return
       }
       try {
-      const makeMoveReturnBody = await MakeMove(playerID, gameID, chosenTicket, locationID)
-      if (makeMoveReturnBody.success) {
-        const makeMoveData = makeMoveReturnBody.data
-        setChosenTicket(null);
-        setlocalLocation(locationID);
-        Alert.alert(makeMoveData.message)
-      }
-      else {
-        console.log("Something has gone wrong with MakeMove ", makeMoveReturnBody.error)
-        return;
-      }
+        const makeMoveReturnBody = await MakeMove(playerID, gameID, chosenTicket, locationID)
+        if (makeMoveReturnBody.success) {
+          const makeMoveData = makeMoveReturnBody.data
+          setChosenTicket(null);
+          setlocalLocation(locationID);
+          Alert.alert(makeMoveData.message)
+        }
+        else {
+          console.log("Something has gone wrong with MakeMove ", makeMoveReturnBody.error)
+          return;
+        }
       } catch (error) {
         console.log("Error has occured: ", error)
       }
@@ -157,50 +183,50 @@ const MapViewer = () => {
             const gameOver = currentTurn + '\n' + 'Winner: ' + gameState.data.winner;
             setCurrentTurn(gameOver);
           } else {
-          setCurrentTurn(currentTurn);
+            setCurrentTurn(currentTurn);
           }
           const fugativeID = gameState.data.players[0].playerId
-         // Update fugative location if needed
-         if (fugativeID === await getItem('localPlayerId')) {
-          console.log("Inside Fugative ID check")
-          const fugativeMoveHistory = await GetPlayerMoveHistory(fugativeID);
-          if (!fugativeMoveHistory.data.moves || fugativeMoveHistory.data.moves.length === 0) {
-            gameState.data.players[0].location = fugativeMoveHistory.data.startLocation;
-          } else {
-            console.log(localLocation);
-            gameState.data.players[0].location = localLocation;
+          // Update fugative location if needed
+          if (fugativeID === await getItem('localPlayerId')) {
+            console.log("Inside Fugative ID check")
+            const fugativeMoveHistory = await GetPlayerMoveHistory(fugativeID);
+            if (!fugativeMoveHistory.data.moves || fugativeMoveHistory.data.moves.length === 0) {
+              gameState.data.players[0].location = fugativeMoveHistory.data.startLocation;
+            } else {
+              console.log("Local location: ", localLocation);
+              gameState.data.players[0].location = localLocation;
 
+            }
           }
-        }
 
-        const colourOffsets = {
-          Clear: { x: -10, y: -10 },
-          Red: { x: 10, y: -10 },
-          Green: { x: -10, y: 10 },
-          Blue: { x: 10, y: 10 },
-          Yellow: { x: 10, y: 0 },
-          Black: { x: -10, y: 0 },
-          default: { x: 0, y: 0 },
-        };
-
-
-        // Create a new array with updated player positions
-        const updatedPlayers = gameState.data.players.map((player, i) => {
-          const locationIndex = player.location - 1;
-
-          const offset = colourOffsets[player.colour] || colourOffsets.default;
-
-          return {
-            ...player, // Copy existing player data
-            xPos: offset.x,
-            yPos: offset.y,
-            //xPos: result.data.locations[locationIndex]?.xPos ?? 0,
-            //yPos: result.data.locations[locationIndex]?.yPos ?? 0,
+          const colourOffsets = {
+            Clear: { x: -10, y: -10 },
+            Red: { x: 10, y: -10 },
+            Green: { x: -10, y: 10 },
+            Blue: { x: 10, y: 10 },
+            Yellow: { x: 10, y: 0 },
+            Black: { x: -10, y: 0 },
+            default: { x: 0, y: 0 },
           };
-        });
 
-        setPlayerLocations(updatedPlayers);
-        console.log("Player Position Fetch Completed", updatedPlayers)
+
+          // Create a new array with updated player positions
+          const updatedPlayers = gameState.data.players.map((player, i) => {
+            const locationIndex = player.location - 1;
+
+            const offset = colourOffsets[player.colour] || colourOffsets.default;
+
+            return {
+              ...player, // Copy existing player data
+              xPos: offset.x,
+              yPos: offset.y,
+              //xPos: result.data.locations[locationIndex]?.xPos ?? 0,
+              //yPos: result.data.locations[locationIndex]?.yPos ?? 0,
+            };
+          });
+
+          setPlayerLocations(updatedPlayers);
+          console.log("Player Position Fetch Completed", updatedPlayers)
         } else {
           console.error('Error:', result.error);
         }
@@ -250,7 +276,7 @@ const MapViewer = () => {
         }, {});
       setTickets(filteredTickets);
     } else {
-    setTickets(filteredData);  // Return original playerData if role is not "Detective"
+      setTickets(filteredData);  // Return original playerData if role is not "Detective"
     }
   }
 
@@ -263,30 +289,30 @@ const MapViewer = () => {
 
   const filterAndModifyData = (data, targetIds) => {
     return data.map(({ moveId, ...filteredItem }) => ({
-      ...filteredItem, 
+      ...filteredItem,
       text: targetIds.includes(filteredItem.round) ? `Dest: ${filteredItem.destination}` : filteredItem.text
     }));
   };
 
   function adjustRounds(moves) {
     let roundMap = new Map(); // Stores the next available round for each seen round
-    
+
     // Process moves to adjust rounds
     let adjustedMoves = moves.map((move) => {
       let { round } = move;
-  
+
       // If this round was seen before, increase it
       while (roundMap.has(round)) {
         round++; // Move it to the next available round
       }
-  
+
       // Store the new round so that future moves don't overlap
       roundMap.set(round, true);
-  
+
       // Return updated move with adjusted round
       return { ...move, round };
     });
-  
+
     return adjustedMoves;
   }
 
@@ -294,9 +320,9 @@ const MapViewer = () => {
     try {
       const gameID = await getItem('localGameID');
       const gameData = await GetGameState(gameID);
-      const length = gameData.data.length + (Math.floor(gameData.data.length/10));
+      const length = gameData.data.length + (Math.floor(gameData.data.length / 10));
       const filteredGameData = gameData.data.players[0];
-      console.log(filteredGameData.playerId)
+      console.log("Filtered playerID: ", filteredGameData.playerId)
       const fetchedData = await GetPlayerMoveHistory(filteredGameData.playerId);
       const moveHistory = fetchedData.data.moves;
       const filteredMoveHistory = filterData(moveHistory);
@@ -305,7 +331,7 @@ const MapViewer = () => {
       const reformatDoubleMoves = adjustRounds(filteredMoveHistory);
       const DrXDisplay = filterAndModifyData(reformatDoubleMoves, revealRounds);
 
-      const defaultBoxes = Array.from({ length  }, (_, index) => ({
+      const defaultBoxes = Array.from({ length }, (_, index) => ({
         round: index + 1, // 1-based index
         ticket: null, // No ticket assigned yet
         text: '', // No text by default
@@ -318,7 +344,7 @@ const MapViewer = () => {
       });
 
       setBoxesData(mergedBoxes);
-      
+
     } catch (error) {
       console.log("Fetch Dr X Error")
       console.log('Error: ', error);
@@ -327,7 +353,7 @@ const MapViewer = () => {
 
   let mapWidth = 0;
   let mapHeight = 0;
-   if (mapData !== null) {
+  if (mapData !== null) {
     mapWidth = mapData.mapWidth;
     mapHeight = mapData.mapHeight;
   }
@@ -360,21 +386,21 @@ const MapViewer = () => {
     })
     .onUpdate((event) => {
       // Restrict translation within boundaries
-    const newTranslationX = prevTranslationX.value + event.translationX;
-    const newTranslationY = prevTranslationY.value + event.translationY;
+      const newTranslationX = prevTranslationX.value + event.translationX;
+      const newTranslationY = prevTranslationY.value + event.translationY;
 
-    // Dynamically update boundaries based on the current map scale
-    const newWidth = mapWidth * scale.value;
-    const newHeight = mapHeight * scale.value;
+      // Dynamically update boundaries based on the current map scale
+      const newWidth = mapWidth * scale.value;
+      const newHeight = mapHeight * scale.value;
 
-    const dynamicMinX = -newWidth;
-    const dynamicMinY = -newHeight;
-    const dynamicMaxX = newWidth;
-    const dynamicMaxY = newHeight;
+      const dynamicMinX = -newWidth;
+      const dynamicMinY = -newHeight;
+      const dynamicMaxX = newWidth;
+      const dynamicMaxY = newHeight;
 
-    // Restrict translation within boundaries
-    translateX.value = clamp(newTranslationX, dynamicMinX, dynamicMaxY);
-    translateY.value = clamp(newTranslationY, dynamicMinY, dynamicMaxX);
+      // Restrict translation within boundaries
+      translateX.value = clamp(newTranslationX, dynamicMinX, dynamicMaxY);
+      translateY.value = clamp(newTranslationY, dynamicMinY, dynamicMaxX);
     })
     .onEnd((event) => {
       // Smooth decay for natural movement
@@ -400,24 +426,24 @@ const MapViewer = () => {
     ],
   }));
 
-    // Check if mapData is still loading
-    if (mapData === null) {
-      return (
-        <View style={styles.container}>
-          <ActivityIndicator size="large" color="#00ff00" />
-        </View>
-      );
-    }
+  // Check if mapData is still loading
+  if (mapData === null) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#00ff00" />
+      </View>
+    );
+  }
 
   return (
     <GestureHandlerRootView>
-    <View style={styles.container}>
+      <View style={styles.container}>
 
-      {/* Text box displaying the current turn */}
-      <View style={styles.turnBox}>
-        <Text style={styles.turnText}>Current Turn: {currentTurn}</Text>
-      </View>
-    { /* Arefeen's Component Code */ }
+        {/* Text box displaying the current turn */}
+        <View style={styles.turnBox}>
+          <Text style={styles.turnText}>Current Turn: {currentTurn}</Text>
+        </View>
+        { /* Arefeen's Component Code */}
 
         <View style={styles.overlayComponent}>
           {/* Dr X Button (Left Side) */}
@@ -426,14 +452,14 @@ const MapViewer = () => {
               <Text style={styles.overlayButtonText}>Dr X</Text>
             </TouchableOpacity>
           </View>
-    
+
           {/* Tickets Button (Bottom Center) */}
           <View style={styles.bottomButtonContainer}>
             <TouchableOpacity style={styles.ticketsButton} onPress={handlePress2}>
               <Text style={styles.overlayButtonText}>Tickets</Text>
             </TouchableOpacity>
           </View>
-    
+
           {/* Dr X Modal (Grey Pop-up) */}
           <Modal
             transparent={true}
@@ -441,8 +467,8 @@ const MapViewer = () => {
             animationType="slide"
             onRequestClose={() => setDrXModalVisible(false)}
           >
-            <View style={styles.modalOverlay} onLayout={(event) =>console.log('Modal Overlay height:', event.nativeEvent.layout.height)}>
-              <View style={styles.drXModalContainer} onLayout={(event) =>console.log('Modal height:', event.nativeEvent.layout.height)}>
+            <View style={styles.modalOverlay} onLayout={(event) => console.log('Modal Overlay height:', event.nativeEvent.layout.height)}>
+              <View style={styles.drXModalContainer} onLayout={(event) => console.log('Modal height:', event.nativeEvent.layout.height)}>
                 <TouchableOpacity
                   style={styles.closeButton}
                   onPress={() => setDrXModalVisible(false)}
@@ -450,11 +476,11 @@ const MapViewer = () => {
                   <Text style={styles.closeButtonText}>X</Text>
                 </TouchableOpacity>
                 <Text style={styles.modalTitle}>Dr X Movements</Text>
-                  <Grid fetchDrXMoveHis={fetchDrXMoveHis} boxesData={boxesData} />
+                <Grid fetchDrXMoveHis={fetchDrXMoveHis} boxesData={boxesData} />
               </View>
             </View>
           </Modal>
-    
+
           {/* Tickets Modal */}
           <Modal
             transparent={true}
@@ -479,66 +505,67 @@ const MapViewer = () => {
                       key={ticketType}  // Ensure each button has a unique key
                       onPress={() => handleTicketButtonPress(ticketType)}  // Handle button press
                     >
-                      <Text style={[styles.overlayButtonText, { color: textColourMapping[ticketType]}]}>{ticketType}</Text>
-                      <Text style={[styles.overlayButtonText, { color: textColourMapping[ticketType]}]}>{count}</Text>
+                      <Text style={[styles.overlayButtonText, { color: textColourMapping[ticketType] }]}>{ticketType}</Text>
+                      <Text style={[styles.overlayButtonText, { color: textColourMapping[ticketType] }]}>{count}</Text>
                     </TouchableOpacity>
-                  ))}                  
+                  ))}
                 </View>
               </View>
             </View>
           </Modal>
         </View>
 
-    {/* Mark's Map Code */}
-      <GestureDetector gesture={combinedGesture}>
-        <Animated.View style={[styles.mapContainer, animatedStyle, {position: 'absolute'}]}>
+        {/* Mark's Map Code */}
+        <GestureDetector gesture={combinedGesture}>
+          <Animated.View style={[styles.mapContainer, animatedStyle, { position: 'absolute' }]}>
             {/* Map Locations */}
-              <Image
-                source={{ uri: mapData.mapImage }}
-                style={{
-                  width: mapData.mapWidth,
-                  height: mapData.mapHeight,
-                }}
-                resizeMode="contain"
-              />
+            <Image
+              source={{ uri: mapData.mapImage }}
+              style={{
+                width: mapData.mapWidth,
+                height: mapData.mapHeight,
+              }}
+              resizeMode="contain"
+            />
 
-          {/* Map Locations */}
-          {mapData.locations.map((loc) => (
-            <TouchableOpacity
-              key={loc.location}
-              style={[
-                styles.button,
-                {
-                  left: loc.xPos,
-                  top: loc.yPos,
-                },
-              ]}
-              onPress={() => saveLocation(loc.location)}
-            >
-              <Text style={styles.buttonText}>{loc.location}</Text>
-              {playerLocations
-                .filter((playerLoc) => {
-                  return playerLoc.location !== "Hidden" && String(playerLoc.location) === String(loc.location)
-                })
-                .map((playerLoc) => (
-                  <View
-                    key={playerLoc.id}
-                    style={[
-                      styles.circle,
-                      {
-                        left: playerLoc.xPos,
-                        top: playerLoc.yPos,
-                        backgroundColor: playerLoc.colour.toLowerCase() === "clear" ? "purple" : playerLoc.colour.toLowerCase(),
-                      },
-                    ]}
-                  />
-                ))}
-            </TouchableOpacity>
-          ))}
+            {/* Map Locations */}
+            {mapData.locations.map((loc) => (
+              <TouchableOpacity
+                key={loc.location}
+                style={[
+                  styles.button,
+                  {
+                    left: loc.xPos,
+                    top: loc.yPos,
+                  },
+                ]}
+                onPress={() => saveLocation(loc.location)}
+              >
+                <Text style={styles.buttonText}>{loc.location}</Text>
+                {playerLocations
+                  .filter((playerLoc) => {
+                    return playerLoc.location !== "Hidden" && String(playerLoc.location) === String(loc.location)
+                  })
+                  .map((playerLoc) => (
+                    <TouchableOpacity
+                      key={playerLoc.playerId}
+                      style={[
+                        styles.circle,
+                        {
+                          left: playerLoc.xPos,
+                          top: playerLoc.yPos,
+                          backgroundColor: playerLoc.colour.toLowerCase() === "clear" ? "purple" : playerLoc.colour.toLowerCase(),
+                        },
+                      ]}
+                      onPress={() => handleKick(playerLoc.playerId, playerLoc.playerName)}
+                      ></TouchableOpacity>
+                  ))}
+              </TouchableOpacity>
+            ))}
 
-          {/* Player Tokens */}
-          <View style={{ position: "absolute", left: 0, top: 0 }}>
-            {/* {playerLocations
+            {/* Player Tokens */}
+            <View style={{ position: "absolute", left: 0, top: 0 }}>
+              {/* {playerLocations
             .filter((loc) => loc.location !== "Hidden")
             .map((loc) => (
               <View 
@@ -554,10 +581,10 @@ const MapViewer = () => {
               />
             ))} */}
 
-          </View>
-        </Animated.View>
-      </GestureDetector>
-    </View>
+            </View>
+          </Animated.View>
+        </GestureDetector>
+      </View>
     </GestureHandlerRootView>
   );
 };
@@ -605,7 +632,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    justifyContent: 'space-between', 
+    justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
     height: '100%',
@@ -618,7 +645,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   drXButton: {
-    backgroundColor: '#ff7f7f', 
+    backgroundColor: '#ff7f7f',
     padding: 15,
     borderRadius: 10,
     marginVertical: 10,
@@ -626,7 +653,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   ticketsButton: {
-    backgroundColor: '#add8e6', 
+    backgroundColor: '#add8e6',
     borderRadius: 10,
     marginVertical: 10,
     height: 50,
@@ -651,24 +678,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   drXModalContainer: {
-    backgroundColor: 'grey', 
+    backgroundColor: 'grey',
     padding: 20,
     borderRadius: 10,
     width: 200,
     maxHeight: '80%',
     flexGrow: 1,
     alignItems: 'center',
-    position: 'relative', 
+    position: 'relative',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
   },
   bottomModalContainer: {
     flex: 1,
-    justifyContent: 'flex-end', 
+    justifyContent: 'flex-end',
   },
   ticketsModal: {
-    backgroundColor: '#ff7f7f', 
+    backgroundColor: '#ff7f7f',
     padding: 20,
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
@@ -699,16 +726,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   buttonRow: {
-    flexDirection: 'row', 
-    justifyContent: 'space-evenly', 
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
     width: width,
     flexWrap: 'wrap',
   },
   colorButton: {
     padding: 15,
     borderRadius: 10,
-    width: 80, 
-    height: 80, 
+    width: 80,
+    height: 80,
     justifyContent: 'center',
     alignItems: 'center',
   },

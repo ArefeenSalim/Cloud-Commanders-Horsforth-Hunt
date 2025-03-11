@@ -9,6 +9,8 @@ export async function checkAndKickPlayer(targetPlayerId) {
         const localGameID = await AsyncStorage.getItem('localGameID');
         const localPlayerId = await AsyncStorage.getItem('localPlayerId');
 
+        console.log("Post async")
+
         // If either value is missing, exit the function
         if (!localGameID || !localPlayerId) {
             console.log('No local game or player ID found.');
