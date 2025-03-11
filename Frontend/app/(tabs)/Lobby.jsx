@@ -4,14 +4,15 @@ import { Link, useRouter } from 'expo-router'
 import { getItem } from "../../utils/AsyncStorage";
 import { StartGame } from "../../utils/API Functions/PatchGameIDStart";
 import { GetGameState } from "../../utils/API Functions/CheckGameState";
+import { getOpenGames } from '../../utils/API Functions/GetGame';
 
 
 
 const ComponentContainer = () => {
 
-    const [repeat, setRepeat] = useState(2);
     const [componentsData, setComponentsData] = useState([]);
     const [lobbyData, setLobbyData] = useState();
+    const [lobbyName, setLobbyName] = useState();
     const [targetPlayerId, settargetPlayerId] = useState(null);
 
     const handleTargetPlayer = (playerId) => {
@@ -46,6 +47,18 @@ const ComponentContainer = () => {
                   console.log(result.data.status);
                   router.navigate('/game_page');
                 }
+                const gameCheck = await getOpenGames();
+                if (gameCheck.success) {
+                  const gameData = gameCheck.data.games
+                for (const element of gameData) {
+                  if (String(element.gameId) == String(localGameID)){
+                    setLobbyName(element.gameName)
+                  }
+                }
+              }
+              else {
+                console.error('Error:', result.error);
+              }
             } else {
                 console.error('Error:', result.error);
             }
@@ -92,8 +105,8 @@ const ComponentContainer = () => {
     return (
       <ScrollView>
       <View style={styles.container}>
-        <Text style={styles.text}>Multiplayer Lobby Page</Text>
-        <Text style={styles.text}>{setLobbyData.gameId}</Text>
+        <Text style={styles.text}>{lobbyName}</Text>
+        <Text style={styles.text}>{lobbyData.gameId}</Text>
         <View style={styles.view}>
           <View style={styles.h2}>
               {componentsData.map((data) => (
