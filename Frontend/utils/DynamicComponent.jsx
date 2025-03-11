@@ -1,7 +1,14 @@
-import React from "react";
-import { View, Text, StyleSheet, TextInput} from 'react-native'
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity} from 'react-native'
 
 const DynamicComponent = (props) => {
+
+    const [targetPlayerId, settargetPlayerId] = useState(null);
+
+    const handleTargetPlayer = (playerId) => {
+        settargetPlayerId(playerId)
+      }
+
     return(
         <View>
             <Text style={styles.h2}>Player</Text>
@@ -10,6 +17,7 @@ const DynamicComponent = (props) => {
             <Text style={styles.text}>{props.content}</Text>
             <Text style={styles.h2}>Player ID</Text>
             <Text style={styles.text}>{props.playerId}</Text>
+            <TouchableOpacity onPress={handleTargetPlayer(props.playerId)}><Text>Select Player</Text></TouchableOpacity>
         </View>
     );
 };

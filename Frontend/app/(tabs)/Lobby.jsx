@@ -13,7 +13,12 @@ const ComponentContainer = () => {
 
     const [repeat, setRepeat] = useState(2);
     const [componentsData, setComponentsData] = useState([]);
-    const [lobbyData, setLobbyData] = useState()
+    const [lobbyData, setLobbyData] = useState();
+    const [targetPlayerId, settargetPlayerId] = useState(null);
+
+    const handleTargetPlayer = (playerId) => {
+      settargetPlayerId(playerId)
+    }
 
     useEffect(() => {
       const intervalId = setInterval(async () => {
@@ -73,9 +78,17 @@ const ComponentContainer = () => {
         <Text style={styles.text}>{setLobbyData.gameId}</Text>
         <View style={styles.view}>
           <View style={styles.h2}>
-              {componentsData.map((data, index) => (
-                <View style={styles.section}>
-                  <DynamicComponent key={index} {...data} />
+              {componentsData.map((data) => (
+                <View style={styles.section} key={data.playerId}>
+                          
+                              <Text style={styles.h2}>Player</Text>
+                              <Text style={styles.text}>{data.title}</Text>
+                              <Text style={styles.h2}>Colour</Text>
+                              <Text style={styles.text}>{data.content}</Text>
+                              <Text style={styles.h2}>Player ID</Text>
+                              <Text style={styles.text}>{data.playerId}</Text>
+                              <TouchableOpacity onPress={handleTargetPlayer(data.playerId)}><Text>Select Player</Text></TouchableOpacity>
+                          
                 </View>
               ))}
           </View>
