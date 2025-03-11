@@ -51,7 +51,6 @@ const ComponentContainer = () => {
                 if (gameCheck.success) {
                   const gameData = gameCheck.data.games
                 for (const element of gameData) {
-                  console.log("Checking gameID: ", String(element.gameId))
                   if (String(element.gameId) == String(localGameID)){
                     setLobbyName(element.gameName)
                   }
