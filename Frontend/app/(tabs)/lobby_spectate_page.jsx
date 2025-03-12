@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Platform } from 'react-native'
 import { useRouter, Link } from "expo-router";
 import React, { useState } from 'react';
-import { setItem } from '../../utils/AsyncStorage'; 
+import { setItem, clear } from '../../utils/AsyncStorage'; 
 
 
 const router = useRouter(); // Get router instance
@@ -10,6 +10,12 @@ const [text, setText] = useState('');
 export default function LobbyCodePage() {
   const router = useRouter(); // Get router instance
   const [text, setText] = useState('');
+
+  const goBack = async () => {
+    await close()
+    router.navigate('/')
+    clear()
+  }
 
   const saveLobbyID = async (lobbyID) => {
       if (lobbyID === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
@@ -49,6 +55,7 @@ export default function LobbyCodePage() {
       placeholder=""
       value={text}
       onChangeText={(newText) => setText(newText)}/>
+      <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={styles.text2}>{"<--------"}</Text></TouchableOpacity>
     </View>
   );
 }
@@ -56,6 +63,22 @@ export default function LobbyCodePage() {
 
 
 const styles = StyleSheet.create({
+  scroll: { flex: 1 },
+  backButton: {
+    backgroundColor: '#9977ff',
+    borderRadius: 5,
+    marginVertical: 20,
+    marginHorizontal: 20,
+    width: 100,
+    height: 40,
+    position: 'absolute',
+    top: 30,
+    left: 20,
+  },
+  text2: {
+    margin: 'auto',
+    fontWeight: 'bold',
+  },
   JoinButton: {
     backgroundColor: '#DDDD91',
     paddingVertical: 15,

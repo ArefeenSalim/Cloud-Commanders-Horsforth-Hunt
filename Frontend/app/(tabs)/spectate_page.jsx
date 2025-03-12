@@ -12,7 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { GetMapData } from '../../utils/API Functions/GetMapData';
 import { GetGameState } from '../../utils/API Functions/CheckGameState';
-import { getItem, setItem } from '../../utils/AsyncStorage';
+import { getItem, setItem, clear } from '../../utils/AsyncStorage';
 import { getPlayerDetails } from '../../utils/API Functions/GetPlayerDetail';
 import { GetPlayerMoveHistory } from '../../utils/API Functions/GetPlayerMoveHistory';
 import { MakeMove } from '../../utils/API Functions/MakeMove';

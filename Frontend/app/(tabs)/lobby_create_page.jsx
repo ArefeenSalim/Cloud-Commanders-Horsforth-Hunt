@@ -13,6 +13,12 @@ export default function LobbyCodePage() {
   const [text, setText] = useState('');
   const [gameDuration, setGameDuration] = useState('short')
 
+  const goBack = async () => {
+    await close()
+    router.navigate('/')
+    clear()
+  }
+
   const changeduration = async () => {
     if (gameDuration === 'short') {
       await setGameDuration('long')
@@ -52,6 +58,7 @@ export default function LobbyCodePage() {
           <Text style={styles.joinButtonText}>Duration: {String(gameDuration).charAt(0).toUpperCase() + String(gameDuration).slice(1)}</Text>
         </TouchableOpacity>
       </View>
+      <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={styles.text2}>{"<--------"}</Text></TouchableOpacity>
     </View>
   );
 }
@@ -59,6 +66,22 @@ export default function LobbyCodePage() {
 
 
 const styles = StyleSheet.create({
+  scroll: { flex: 1 },
+  backButton: {
+    backgroundColor: '#9977ff',
+    borderRadius: 5,
+    marginVertical: 20,
+    marginHorizontal: 20,
+    width: 100,
+    height: 40,
+    position: 'absolute',
+    top: 30,
+    left: 20,
+  },
+  text2: {
+    margin: 'auto',
+    fontWeight: 'bold',
+  },
   container: {
     display: 'flex',
     flexDirection: 'row',

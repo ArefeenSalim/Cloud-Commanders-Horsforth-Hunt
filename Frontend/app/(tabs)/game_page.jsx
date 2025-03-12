@@ -12,12 +12,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { GetMapData } from '../../utils/API Functions/GetMapData';
 import { GetGameState } from '../../utils/API Functions/CheckGameState';
-import { getItem, setItem } from '../../utils/AsyncStorage';
+import { getItem, setItem, clear } from '../../utils/AsyncStorage';
 import { getPlayerDetails } from '../../utils/API Functions/GetPlayerDetail';
 import { GetPlayerMoveHistory } from '../../utils/API Functions/GetPlayerMoveHistory';
 import { MakeMove } from '../../utils/API Functions/MakeMove';
 import { checkAndKickPlayer } from '../../utils/KickPlayer';
 import Grid from './grid';
+import { Link, useRouter } from 'expo-router'
 
 const { width, height } = Dimensions.get('window');
 const colourMapping = {
@@ -57,6 +58,14 @@ const MapViewer = () => {
   //Arefeen's Components Start
   const [ticketsModalVisible, setTicketsModalVisible] = useState(false);
   const [drXModalVisible, setDrXModalVisible] = useState(false);
+
+  const router = useRouter();
+
+  const goBack = async () => {
+    await close()
+    router.navigate('/')
+    clear()
+  }
 
   const handleKick = async (targetPlayerId, playerName) => {
     // Confirm wish to kick
@@ -441,7 +450,6 @@ const MapViewer = () => {
   return (
     <GestureHandlerRootView>
       <View style={styles.container}>
-
         {/* Text box displaying the current turn */}
         <View style={styles.turnBox}>
           <Text style={styles.turnText}>Current Turn: {currentTurn}</Text>
@@ -461,6 +469,10 @@ const MapViewer = () => {
             <TouchableOpacity style={styles.ticketsButton} onPress={handlePress2}>
               <Text style={styles.overlayButtonText}>Tickets</Text>
             </TouchableOpacity>
+          </View>
+
+          <View style={styles.backToHome}>
+          <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={styles.text2}>{"<--------"}</Text></TouchableOpacity>
           </View>
 
           {/* Dr X Modal (Grey Pop-up) */}
@@ -593,6 +605,26 @@ const MapViewer = () => {
 };
 
 const styles = StyleSheet.create({
+  backToHome: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+  },
+  backButton: {
+    backgroundColor: '#9977ff',
+    borderRadius: 5,
+    marginVertical: 20,
+    marginHorizontal: 20,
+    width: 100,
+    height: 40,
+    position: 'absolute',
+    top: 30,
+    left: 20,
+  },
+  text2: {
+    margin: 'auto',
+    fontWeight: 'bold',
+  },
   container: {
     flex: 1,
     backgroundColor: 'black',
