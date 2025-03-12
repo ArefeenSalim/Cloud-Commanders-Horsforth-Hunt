@@ -10,7 +10,6 @@ const [text, setText] = useState('');
 
 export default function UsernamePage() {
     const [text, setText] = useState('');
-    const mapNumb = 600;
     let returnData;
 
     const goBack = async () => {
@@ -20,20 +19,22 @@ export default function UsernamePage() {
     };
 
     const InitLobby = async (username) => {
-        console.log("InitLobby Triggered")
+        console.log("InitLobby Triggered Change")
+        console.log(await getItem('targetMap'))
         if (username === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
             Alert.alert('Error', 'Input Username');
             return;
         } else if ((username != null || username != undefined) && await getItem('isHost')) {
+
                   try {
                   const gameDuration = await getItem('localGameDuration');
+                  console.log("This is targetMap: ", await getItem('targetMap'))
 
-                  const result = await CreateGame(await getItem('lobbyName'), mapNumb, gameDuration)
+                  const result = await CreateGame(await getItem('lobbyName'), await getItem('targetMap'), gameDuration)
         
                   if (result.success) {
-                      console.log('JSON Data:', result.data);
+                      console.log('Create Game JSON Data:', result.data);
                       returnData = result.data;
-                      console.log(returnData.gameId);
             
                       await setItem('localGameID', returnData.gameId);
                   } else {
@@ -46,6 +47,7 @@ export default function UsernamePage() {
                     return;
                   }
         } 
+        console.log("Post create Game");
         try {
             const addResult = await AddPlayer(username, await getItem('localGameID'))
 

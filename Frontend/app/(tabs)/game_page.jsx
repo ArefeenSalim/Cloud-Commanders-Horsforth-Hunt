@@ -34,10 +34,6 @@ const textColourMapping = {
   black: 'white',
   x2: 'black'
 };
-const gameDuration = {
-  short: 13,
-  long: 22,
-};
 
 const MapViewer = () => {
   const [mapData, setMapData] = useState(null);
@@ -48,11 +44,11 @@ const MapViewer = () => {
   const [localLocation, setlocalLocation] = useState(null);
   const [currentTurn, setCurrentTurn] = useState(null);
   const [gameLength, setGameLength] = useState(null);
+  const [mapID, setMapID] = useState(null);
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
   const offset = useSharedValue({ x: 0, y: 0 });
   const start = useSharedValue({ x: 0, y: 0 });
-  const mapID = 600;
 
   //Arefeen's Components Start
   const [ticketsModalVisible, setTicketsModalVisible] = useState(false);
@@ -157,7 +153,9 @@ const MapViewer = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        if (mapID) {
         const result = await GetMapData(mapID);
+        console.log("Result: ", result);
         if (result.success && Array.isArray(result.data.locations)) {
           const mapOffsets  = {
             600: { x: -40, y: -40 },
@@ -181,25 +179,31 @@ const MapViewer = () => {
         } else {
           console.error('Error:', result.error);
         }
+      } else {
+        console.log("Waiting for mapID to update")
+      }
       } catch (error) {
         console.error('Fetch error:', error);
       }
     };
 
     fetchData();
-  }, []);
+  }, [mapID]);
 
   // Polling function to get and update player location data on map.
   // Has been expanded to check the current game state and update that info
   useEffect(() => {
     const intervalId = setInterval(async () => {
       try {
-        const result = await GetMapData(mapID);
-        if (result.success) {
-          const gameState = await GetGameState(await getItem('localGameID'))
+        const gameState = await GetGameState(await getItem('localGameID'))
+        if (gameState.success) {
+          
 
           const gameLengthString = gameState.data.round + " / " + gameState.data.length
           setGameLength(gameLengthString)
+
+          setMapID(gameState.data.mapId);
+          
 
           const currentTurn = gameState.data.state
           if (currentTurn === "Over") {
@@ -384,12 +388,6 @@ const MapViewer = () => {
     mapHeight = mapData.mapHeight;
   }
 
-  // Calculate boundaries for panning
-  let minX = -mapWidth //+ SCREEN_WIDTH; // Left boundary
-  let minY = -mapHeight //+ SCREEN_HEIGHT; // Top boundary
-  let maxX = mapWidth; // Right boundary
-  let maxY = mapHeight; // Bottom boundary
-
 
 const panGesture = Gesture.Pan()
     .averageTouches(true)
@@ -437,6 +435,7 @@ const panGesture = Gesture.Pan()
 
   // Check if mapData is still loading
   if (mapData === null) {
+    console.log("Map ID: ", mapID)
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#00ff00" />
