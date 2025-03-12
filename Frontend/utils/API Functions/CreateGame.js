@@ -49,7 +49,7 @@ export async function CreateGame(gameName, mapID, gameLength) {
         }
     */
 
-// await CreateGame("Cloud Commanders Test Success", 1, "Short")
+// CreateGame("Cloud Commanders Long Game", 1, "Long")
 //     .then((result) => {
 //         if (result.success) {
 //             console.log('JSON Data:', result.data);

@@ -13,15 +13,7 @@ const ComponentContainer = () => {
     const [componentsData, setComponentsData] = useState([]);
     const [lobbyData, setLobbyData] = useState();
     const [lobbyName, setLobbyName] = useState();
-    const [targetPlayerId, settargetPlayerId] = useState(null);
-
-  const handleKick = async () => {
-    // Update the status message before executing the function
-    console.log("Handling Kick")
-
-    // Call the function that checks and potentially kicks the player
-    await checkAndKickPlayer(targetPlayerId);
-  };
+    const router = useRouter();
 
   if (lobbyData === null) {
     return (
@@ -30,15 +22,10 @@ const ComponentContainer = () => {
       </View>
     );
   }
-    const router = useRouter();
 
     const goBack = async () => {
       await close()
       router.navigate('/index')
-    }
-
-    const handleTargetPlayer = (playerId) => {
-      settargetPlayerId(playerId)
     }
 
     async function startGameButton() {
@@ -62,9 +49,9 @@ const ComponentContainer = () => {
             const localGameID = await getItem('localGameID')
             const result = await GetGameState(localGameID);
             if (result.success) {
-                console.log(result.data);
                 setLobbyData(result.data);
-                if (result.data.status !== "Open" && result.data.status !== undefined) {
+                console.log("Status: ", result.data.state);
+                if (result.data.state !== "Open" && result.data.state !== undefined) {
                   console.log(result.data.status);
                   router.navigate('/game_page');
                 }
@@ -139,15 +126,11 @@ const ComponentContainer = () => {
                   <Text style={styles.text}>{data.content}</Text>
                   <Text style={styles.titles}>Player ID</Text>
                   <Text style={styles.text}>{data.playerId}</Text>
-                  <TouchableOpacity style={styles.selectPlayer} onPress={() => handleTargetPlayer(data.playerId)}><Text style={styles.text2}>Select Player</Text></TouchableOpacity>
                 </View>
               ))}
               
           </View>
           <View style={styles.flex}>
-            <TouchableOpacity style={styles.button} onPress={handleKick}>
-              <Text style={styles.refresh}>Kick Player</Text>
-            </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={startGameButton}>
               <Text style={styles.refresh}>Start Game</Text>
             </TouchableOpacity>

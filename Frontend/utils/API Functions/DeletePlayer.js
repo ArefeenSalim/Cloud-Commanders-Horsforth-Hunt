@@ -11,7 +11,7 @@ class KickPlayerResponse {
 }
 
 export async function kickPlayerDetail(playerId) {
-    const url = `http://trinity-developments.co.uk/players/${playerId}`; // Replace with actual API URL
+    const url = `http://trinity-developments.co.uk/players/${playerId}`;
     
     try {
         const response = await fetch(url, {
@@ -20,17 +20,17 @@ export async function kickPlayerDetail(playerId) {
                 'Content-Type': 'application/json'
             }
         });
-        
-        if (response.ok) {
-            const data = await response.json();
-            return { success: true, data };
-        } else {
+        console.log("Post Fetch");
+        if (!response.ok) {
+            console.log("Throwing error")
             throw new Error(`Error: ${response.status} - ${await response.text()}`);
         }
+        const data = await response.json();
+        return { success: true, data };
     } catch (error) {
-        console.error("Error kicking player:", error);
-        return { success: false, error: error}
-}
+        console.error("Error kicking player:", error.message);
+        return { success: false, error: error.message}
+    }
 }
 // Example Usage:
 //kickPlayerDetail(588).then(console.log).catch(console.error);

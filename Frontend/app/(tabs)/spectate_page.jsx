@@ -1,4 +1,4 @@
-// game_page.jsx
+// specate_page.jsx
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Text, Modal, ActivityIndicator, Dimensions, Alert } from 'react-native';
@@ -45,7 +45,6 @@ const MapViewer = () => {
   const [tickets, setTickets] = useState([]);
   const [boxesData, setBoxesData] = useState([]);
   const [chosenTicket, setChosenTicket] = useState(null);
-  const [localLocation, setlocalLocation] = useState(null);
   const [currentTurn, setCurrentTurn] = useState(null);
   const scale = useSharedValue(1);
   const translateX = useSharedValue(0);
@@ -83,74 +82,7 @@ const MapViewer = () => {
     // await checkAndKickPlayer(targetPlayerId);
   };
 
-  const handlePress1 = () => {
-    setDrXModalVisible(true); // Show Dr X modal
-    fetchDrXMoveHis();
-  };
-
-  const handlePress2 = () => {
-    setTicketsModalVisible(true); // Show Tickets modal at bottom
-    filterTickets();
-  };
-
-  const handleTicketButtonPress = (ticket) => {
-    console.log(`${ticket} button pressed`);
-    setChosenTicket(ticket);
-    setTicketsModalVisible(false); // Close the tickets modal
-  };
-
   //Arefeen Components End
-
-  const saveLocation = async (locationID) => {
-    if (chosenTicket != null && locationID != null) {
-      let playerID;
-      let gameID
-      try {
-        playerID = await getItem('localPlayerId')
-        gameID = await getItem('localGameID')
-      } catch (error) {
-        console.log("Error in retrieving local data");
-        return
-      }
-      try {
-        const makeMoveReturnBody = await MakeMove(playerID, gameID, chosenTicket, locationID)
-        if (makeMoveReturnBody.success) {
-          const makeMoveData = makeMoveReturnBody.data
-          setChosenTicket(null);
-          setlocalLocation(locationID);
-          Alert.alert(makeMoveData.message)
-        }
-        else {
-          console.log("Something has gone wrong with MakeMove ", makeMoveReturnBody.error)
-          return;
-        }
-      } catch (error) {
-        console.log("Error has occured: ", error)
-      }
-    }
-  }
-
-  // const getPlayerDetails = async() => {
-  //   const gameId = await getItem('localGameID')
-  //   try {
-  //     const result = await GetGameState(gameId);
-  //     if (result.success) {
-  //       gameData(result.data);
-  //     } else {
-  //       console.error('Error:', result.error);
-  //       return
-  //     }
-  //   } catch (error) {
-  //     console.error('Fetch error:', error);
-  //     return
-  //   }  
-  //   if (await getItem('LocalPlayerID') == gameData.players[0])  {
-
-  //   }
-  //   for (let i = 1; i < Object.keys(gameData.players); i++) {
-
-  //   }
-  // }
 
   // Example buttons (x, y positions are relative to the map)
   useEffect(() => {
@@ -175,6 +107,7 @@ const MapViewer = () => {
   useEffect(() => {
     const intervalId = setInterval(async () => {
       try {
+        fetchDrXMoveHis();
         const result = await GetMapData(mapID);
         if (result.success) {
           const gameState = await GetGameState(await getItem('localGameID'))
@@ -184,19 +117,6 @@ const MapViewer = () => {
             setCurrentTurn(gameOver);
           } else {
             setCurrentTurn(currentTurn);
-          }
-          const fugativeID = gameState.data.players[0].playerId
-          // Update fugative location if needed
-          if (fugativeID === await getItem('localPlayerId')) {
-            console.log("Inside Fugative ID check")
-            const fugativeMoveHistory = await GetPlayerMoveHistory(fugativeID);
-            if (!fugativeMoveHistory.data.moves || fugativeMoveHistory.data.moves.length === 0) {
-              gameState.data.players[0].location = fugativeMoveHistory.data.startLocation;
-            } else {
-              console.log("Local location: ", localLocation);
-              gameState.data.players[0].location = localLocation;
-
-            }
           }
 
           const colourOffsets = {
@@ -239,7 +159,7 @@ const MapViewer = () => {
     }, 5000);
 
     return () => clearInterval(intervalId)
-  }, [localLocation]);
+  }, []);
 
   // useEffect(() => {
   //   fetchDrXMoveHis();
@@ -440,84 +360,24 @@ const MapViewer = () => {
 
   return (
     <GestureHandlerRootView>
+        
       <View style={styles.container}>
 
         {/* Text box displaying the current turn */}
         <View style={styles.turnBox}>
           <Text style={styles.turnText}>Current Turn: {currentTurn}</Text>
         </View>
+
         { /* Arefeen's Component Code */}
 
-        <View style={styles.overlayComponent}>
-          {/* Dr X Button (Left Side) */}
-          <View style={styles.leftButtonContainer}>
-            <TouchableOpacity style={styles.drXButton} onPress={handlePress1}>
-              <Text style={styles.overlayButtonText}>Dr X</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Tickets Button (Bottom Center) */}
-          <View style={styles.bottomButtonContainer}>
-            <TouchableOpacity style={styles.ticketsButton} onPress={handlePress2}>
-              <Text style={styles.overlayButtonText}>Tickets</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Dr X Modal (Grey Pop-up) */}
-          <Modal
-            transparent={true}
-            visible={drXModalVisible}
-            animationType="slide"
-            onRequestClose={() => setDrXModalVisible(false)}
-          >
-            <View style={styles.modalOverlay} onLayout={(event) => console.log('Modal Overlay height:', event.nativeEvent.layout.height)}>
+        {/* Dr X Modal Container, trying to get to fixed to the leftside */}
+        <View style={styles.modalOverlay} onLayout={(event) => console.log('Modal Overlay height:', event.nativeEvent.layout.height)}>
               <View style={styles.drXModalContainer} onLayout={(event) => console.log('Modal height:', event.nativeEvent.layout.height)}>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setDrXModalVisible(false)}
-                >
-                  <Text style={styles.closeButtonText}>X</Text>
-                </TouchableOpacity>
                 <Text style={styles.modalTitle}>Dr X Movements</Text>
                 <Grid fetchDrXMoveHis={fetchDrXMoveHis} boxesData={boxesData} />
               </View>
             </View>
-          </Modal>
-
-          {/* Tickets Modal */}
-          <Modal
-            transparent={true}
-            visible={ticketsModalVisible}
-            animationType="slide"
-            onRequestClose={() => setTicketsModalVisible(false)}
-          >
-            <View style={styles.bottomModalContainer}>
-              <View style={styles.ticketsModal}>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setTicketsModalVisible(false)}
-                >
-                  <Text style={styles.closeButtonText}>X</Text>
-                </TouchableOpacity>
-                <Text style={styles.modalTitle}>Choose a ticket</Text>
-                <View style={styles.buttonRow}>
-
-                  {Object.entries(tickets).map(([ticketType, count]) => (
-                    <TouchableOpacity
-                      style={[styles.colorButton, { backgroundColor: colourMapping[ticketType] || 'gray' }]}
-                      key={ticketType}  // Ensure each button has a unique key
-                      onPress={() => handleTicketButtonPress(ticketType)}  // Handle button press
-                    >
-                      <Text style={[styles.overlayButtonText, { color: textColourMapping[ticketType] }]}>{ticketType}</Text>
-                      <Text style={[styles.overlayButtonText, { color: textColourMapping[ticketType] }]}>{count}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            </View>
-          </Modal>
-        </View>
-
+            
         {/* Mark's Map Code */}
         <GestureDetector gesture={combinedGesture}>
           <Animated.View style={[styles.mapContainer, animatedStyle, { position: 'absolute' }]}>
@@ -533,7 +393,7 @@ const MapViewer = () => {
 
             {/* Map Locations */}
             {mapData.locations.map((loc) => (
-              <TouchableOpacity
+              <View
                 key={loc.location}
                 style={[
                   styles.button,
@@ -542,7 +402,6 @@ const MapViewer = () => {
                     top: loc.yPos,
                   },
                 ]}
-                onPress={() => saveLocation(loc.location)}
               >
                 <Text style={styles.buttonText}>{loc.location}</Text>
                 {playerLocations
@@ -550,7 +409,7 @@ const MapViewer = () => {
                     return playerLoc.location !== "Hidden" && String(playerLoc.location) === String(loc.location)
                   })
                   .map((playerLoc) => (
-                    <TouchableOpacity
+                    <View
                       key={playerLoc.playerId}
                       style={[
                         styles.circle,
@@ -560,31 +419,12 @@ const MapViewer = () => {
                           backgroundColor: playerLoc.colour.toLowerCase() === "clear" ? "purple" : playerLoc.colour.toLowerCase(),
                         },
                       ]}
-                      onPress={() => handleKick(playerLoc.playerId, playerLoc.playerName)}
-                      ></TouchableOpacity>
+                      ></View>
                   ))}
-              </TouchableOpacity>
+              </View>
             ))}
 
             {/* Player Tokens */}
-            <View style={{ position: "absolute", left: 0, top: 0 }}>
-              {/* {playerLocations
-            .filter((loc) => loc.location !== "Hidden")
-            .map((loc) => (
-              <View 
-              key={loc.location}
-              style={[
-                styles.circle,
-                {
-                  left: loc.xPos,
-                  top: loc.yPos,  
-                  backgroundColor: loc.colour.toLowerCase() === "clear" ? "purple" : loc.colour.toLowerCase()     
-                },
-              ]}
-              />
-            ))} */}
-
-            </View>
           </Animated.View>
         </GestureDetector>
       </View>
@@ -675,23 +515,22 @@ const styles = StyleSheet.create({
     left: width / 2 - 50,
   },
   modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center', // Centers the content vertically
+    alignItems: 'flex-start', // Aligns content to the left
+    padding: 10,
+    zIndex: 10,
   },
   drXModalContainer: {
-    backgroundColor: 'grey',
-    padding: 20,
+    width: '50%',  
+    height: '80%', 
+    backgroundColor: 'white',
+    padding: 10,
     borderRadius: 10,
-    width: 200,
-    maxHeight: '80%',
-    flexGrow: 1,
-    alignItems: 'center',
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignSelf: 'flex-start', // Ensures it's aligned to the left
   },
   bottomModalContainer: {
     flex: 1,
