@@ -26,4 +26,4 @@ export async function getMaps() {
 }
 
 // Call the getMaps function to fetch and display the map data
-getMaps();
+// getMaps();

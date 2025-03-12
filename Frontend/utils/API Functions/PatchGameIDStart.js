@@ -19,14 +19,14 @@ export const StartGame = async (gameId, playerId) => {
     const data = await response.json();    
     return { success: true, data };
 } catch (error) {
-    console.error("Error adding game:", error);
+    console.error("Error starting game:", error);
     return { success: false, error: error}
 }
 };
 
 // Example usage:
-const gameId = '181';  // Replace with actual game ID
-const playerId = '466';  // Replace with the player ID trying to start the game
+const gameId = '440';  // Replace with actual game ID
+const playerId = '1059';  // Replace with the player ID trying to start the game
 // const token = 'yourAccessToken';  // Replace with actual access token
 
-// StartGame(gameId, playerId);
+//StartGame(gameId, playerId);

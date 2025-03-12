@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, ScrollView, ActivityIndicator, TouchableOpacity, Alert, } from 'react-native'
+import { View, Text, StyleSheet, TextInput, Button, ScrollView, ActivityIndicator, TouchableOpacity, Alert, Platform } from 'react-native'
 import { Link, useRouter } from 'expo-router'
 import { getItem, clear } from "../../utils/AsyncStorage";
 import { StartGame } from "../../utils/API Functions/PatchGameIDStart";
@@ -53,8 +53,11 @@ const ComponentContainer = () => {
                 setLobbyData(result.data);
                 console.log("Status: ", result.data.state);
                 if (result.data.state !== "Open" && result.data.state !== undefined) {
-                  console.log(result.data.status);
-                  router.navigate('/game_page');
+                  if (Platform.OS !== "web") {
+                    router.navigate('/game_page');
+                  } else {
+                    router.navigate('/spectate_page');
+                  }
                 }
                 const gameCheck = await getOpenGames();
                 if (gameCheck.success) {
@@ -84,16 +87,14 @@ const ComponentContainer = () => {
       try {
       const playerLobbyData = lobbyData.players;
       if (!(playerLobbyData == null || playerLobbyData == undefined)) {
-      console.log('this is the player output', lobbyData.players)
       const settingData = playerLobbyData.map(playerInfo => ({
         title: playerInfo.playerName,
         content: playerInfo.colour,
         playerId: playerInfo.playerId
       }))
-      console.log(settingData)
       setComponentsData(settingData);
     } else { 
-      console.log('lobby still loading')}
+      console.log('Lobby still loading')}
     } catch (error) {
       console.log("Error with player data loading: ", error)
     }
@@ -131,11 +132,17 @@ const ComponentContainer = () => {
               ))}
               
           </View>
-          <View style={styles.flex}>
-            <TouchableOpacity style={styles.button} onPress={startGameButton}>
-              <Text style={styles.refresh}>Start Game</Text>
-            </TouchableOpacity>
-          </View>
+              {Platform.OS !== 'web' ? (
+                <View style={styles.flex}>
+                  <TouchableOpacity style={styles.button} onPress={startGameButton}>
+                    <Text style={styles.refresh}>Start Game</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View style={styles.flex}>
+                  <Text style={[styles.refresh, { fontSize: 26, color: 'yellow', marginTop: 10 }]}>Waiting for Game to Start...</Text>
+                </View>
+              )}
         </View>
       </View>
       </ScrollView>

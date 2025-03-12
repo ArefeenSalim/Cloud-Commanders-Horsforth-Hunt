@@ -24,7 +24,7 @@ export async function AddPlayer(playerName, gameID) {
 
         return { success: true, data };
     } catch (error) {
-        console.error("Error adding game:", error);
+        console.error("Error adding Player:", error);
         return { success: false, error: error}
     }
 }
@@ -60,7 +60,7 @@ export async function AddPlayer(playerName, gameID) {
 
 // Example call
 
-// var returnData = AddPlayer("targetToKick", 239)
+// AddPlayer("Mark", 471)
 //     .then(response => console.log(response))
 //     .catch(error => console.error(error));
 

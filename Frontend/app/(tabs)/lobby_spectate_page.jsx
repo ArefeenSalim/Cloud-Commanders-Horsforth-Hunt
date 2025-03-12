@@ -25,7 +25,7 @@ export default function LobbyCodePage() {
           let parsedLobbyID = parseInt(lobbyID)
           if (!isNaN(parsedLobbyID) && lobbyID === '' + parsedLobbyID) {
             await setItem('localGameID', parseInt(lobbyID))
-            router.navigate('/spectate_page');
+            router.navigate('/Lobby');
           } else {
             if (Platform.OS == 'android' || Platform.OS == 'ios') {
               Alert.alert('Error', 'Input Integer');
