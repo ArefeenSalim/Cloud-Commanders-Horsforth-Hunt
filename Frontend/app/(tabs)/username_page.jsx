@@ -20,8 +20,10 @@ export default function UsernamePage() {
             return;
         } else if ((username != null || username != undefined) && await getItem('isHost')) {
                   try {
-                  const result = await CreateGame(await getItem('lobbyName'), mapNumb, 'short')
-            
+                  const gameDuration = await getItem('localGameDuration');
+
+                  const result = await CreateGame(await getItem('lobbyName'), mapNumb, gameDuration)
+        
                   if (result.success) {
                       console.log('JSON Data:', result.data);
                       returnData = result.data;
