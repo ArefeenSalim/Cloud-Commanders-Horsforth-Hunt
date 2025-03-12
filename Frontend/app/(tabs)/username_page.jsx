@@ -10,7 +10,7 @@ const [text, setText] = useState('');
 
 export default function UsernamePage() {
     const [text, setText] = useState('');
-    const mapNumb = 801;
+    const mapNumb = 600;
     let returnData;
 
     const InitLobby = async (username) => {

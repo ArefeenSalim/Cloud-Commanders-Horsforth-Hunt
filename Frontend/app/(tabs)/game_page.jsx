@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Text, Modal, ActivityIndicator, Dimensions, Alert } from 'react-native';
-import { GestureHandlerRootView, GestureDetector, Gesture } from 'react-native-gesture-handler';
+import { GestureHandlerRootView, GestureDetector, Gesture, withSpring } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -47,12 +47,12 @@ const MapViewer = () => {
   const [chosenTicket, setChosenTicket] = useState(null);
   const [localLocation, setlocalLocation] = useState(null);
   const [currentTurn, setCurrentTurn] = useState(null);
+  const [gameLength, setGameLength] = useState(null);
   const scale = useSharedValue(1);
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
-  const prevTranslationX = useSharedValue(0);
-  const prevTranslationY = useSharedValue(0);
-  const mapID = 801; //801;
+  const savedScale = useSharedValue(1);
+  const offset = useSharedValue({ x: 0, y: 0 });
+  const start = useSharedValue({ x: 0, y: 0 });
+  const mapID = 600;
 
   //Arefeen's Components Start
   const [ticketsModalVisible, setTicketsModalVisible] = useState(false);
@@ -102,6 +102,7 @@ const MapViewer = () => {
   //Arefeen Components End
 
   const saveLocation = async (locationID) => {
+    console.log("Location Pressed: ", locationID)
     if (chosenTicket != null && locationID != null) {
       let playerID;
       let gameID
@@ -157,8 +158,26 @@ const MapViewer = () => {
     const fetchData = async () => {
       try {
         const result = await GetMapData(mapID);
-        if (result.success) {
-          setMapData(result.data);
+        if (result.success && Array.isArray(result.data.locations)) {
+          const mapOffsets  = {
+            600: { x: -40, y: -40 },
+            default: { x: 0, y: 0 },
+          };
+
+          const offset = mapOffsets[result.data.mapId] || mapOffsets.default;
+
+          const updatedLocations = {
+            ...result,
+            data: {
+                ...result.data,
+                locations: result.data.locations.map((location) => ({
+                    ...location,
+                    xPos: (location?.xPos ?? 0) + offset.x,
+                    yPos: (location?.yPos ?? 0) + offset.y,
+                })),
+            }
+          }
+          setMapData(updatedLocations.data);
         } else {
           console.error('Error:', result.error);
         }
@@ -178,6 +197,10 @@ const MapViewer = () => {
         const result = await GetMapData(mapID);
         if (result.success) {
           const gameState = await GetGameState(await getItem('localGameID'))
+
+          const gameLengthString = gameState.data.round + " / " + gameState.data.length
+          setGameLength(gameLengthString)
+
           const currentTurn = gameState.data.state
           if (currentTurn === "Over") {
             const gameOver = currentTurn + '\n' + 'Winner: ' + gameState.data.winner;
@@ -343,7 +366,7 @@ const MapViewer = () => {
       const mergedBoxes = defaultBoxes.map((defaultBox) => {
         // Find a move that matches the round
         const move = DrXDisplay.find((box) => box.round === defaultBox.round);
-        return move ? move : defaultBox;
+        return move || defaultBox;
       });
 
       setBoxesData(mergedBoxes);
@@ -367,55 +390,38 @@ const MapViewer = () => {
   let maxX = mapWidth; // Right boundary
   let maxY = mapHeight; // Bottom boundary
 
-  // Pinch (Zoom) Gesture
-  const pinchGesture = Gesture.Pinch().onUpdate((event) => {
-    scale.value = event.scale;
 
-    // Dynamically update the boundaries when zooming in or out
-    const newWidth = mapWidth * scale.value;
-    const newHeight = mapHeight * scale.value;
-
-    minX = -newWidth;
-    minY = -newHeight;
-    maxX = newWidth;
-    maxY = newHeight;
-  });
-
-  // Pan (Drag) Gesture with boundaries
-  const panGesture = Gesture.Pan()
-    .onStart(() => {
-      prevTranslationX.value = translateX.value;
-      prevTranslationY.value = translateY.value;
+const panGesture = Gesture.Pan()
+    .averageTouches(true)
+    .onUpdate((e) => {
+      const panSpeedMult = 3
+      offset.value = {
+        x: e.translationX * panSpeedMult + start.value.x,
+        y: e.translationY * panSpeedMult + start.value.y,
+      };
     })
-    .onUpdate((event) => {
-      // Restrict translation within boundaries
-      const newTranslationX = prevTranslationX.value + event.translationX;
-      const newTranslationY = prevTranslationY.value + event.translationY;
-
-      // Dynamically update boundaries based on the current map scale
-      const newWidth = mapWidth * scale.value;
-      const newHeight = mapHeight * scale.value;
-
-      const dynamicMinX = -newWidth;
-      const dynamicMinY = -newHeight;
-      const dynamicMaxX = newWidth;
-      const dynamicMaxY = newHeight;
-
-      // Restrict translation within boundaries
-      translateX.value = clamp(newTranslationX, dynamicMinX, dynamicMaxY);
-      translateY.value = clamp(newTranslationY, dynamicMinY, dynamicMaxX);
-    })
-    .onEnd((event) => {
-      // Smooth decay for natural movement
-      translateX.value = withDecay({
-        velocity: event.velocityX,
-        clamp: [minX, maxX],
-      });
-      translateY.value = withDecay({
-        velocity: event.velocityY,
-        clamp: [minY, maxY],
-      });
+    .onEnd(() => {
+      start.value = {
+        x: offset.value.x,
+        y: offset.value.y,
+      };
     });
+
+  const pinchGesture = Gesture.Pinch()
+    .onUpdate((event) => {
+      scale.value = savedScale.value * event.scale;
+    })
+    .onEnd(() => {
+      savedScale.value = scale.value;
+    });
+
+  const resetPosition = () => {
+    offset.value = {
+      x: 0,
+      y: 0,
+    };
+    scale.value = 1;
+  }
 
   // Combine gestures
   const combinedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
@@ -424,8 +430,8 @@ const MapViewer = () => {
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
       { scale: scale.value },
-      { translateX: translateX.value },
-      { translateY: translateY.value },
+      { translateX: offset.value.x },
+      { translateY: offset.value.y },
     ],
   }));
 
@@ -444,6 +450,7 @@ const MapViewer = () => {
 
         {/* Text box displaying the current turn */}
         <View style={styles.turnBox}>
+          <Text style={styles.turnText}>Round: {gameLength}</Text>
           <Text style={styles.turnText}>Current Turn: {currentTurn}</Text>
         </View>
         { /* Arefeen's Component Code */}
@@ -536,7 +543,7 @@ const MapViewer = () => {
               <TouchableOpacity
                 key={loc.location}
                 style={[
-                  styles.button,
+                  styles.location,
                   {
                     left: loc.xPos,
                     top: loc.yPos,
@@ -544,7 +551,7 @@ const MapViewer = () => {
                 ]}
                 onPress={() => saveLocation(loc.location)}
               >
-                <Text style={styles.buttonText}>{loc.location}</Text>
+                <Text style={styles.locationText}>{loc.location}</Text>
                 {playerLocations
                   .filter((playerLoc) => {
                     return playerLoc.location !== "Hidden" && String(playerLoc.location) === String(loc.location)
@@ -565,29 +572,12 @@ const MapViewer = () => {
                   ))}
               </TouchableOpacity>
             ))}
-
-            {/* Player Tokens */}
-            <View style={{ position: "absolute", left: 0, top: 0 }}>
-              {/* {playerLocations
-            .filter((loc) => loc.location !== "Hidden")
-            .map((loc) => (
-              <View 
-              key={loc.location}
-              style={[
-                styles.circle,
-                {
-                  left: loc.xPos,
-                  top: loc.yPos,  
-                  backgroundColor: loc.colour.toLowerCase() === "clear" ? "purple" : loc.colour.toLowerCase()     
-                },
-              ]}
-              />
-            ))} */}
-
-            </View>
           </Animated.View>
         </GestureDetector>
       </View>
+      <TouchableOpacity onPress={(resetPosition)}>
+        <Text>Return Position</Text>
+      </TouchableOpacity>
     </GestureHandlerRootView>
   );
 };
@@ -609,17 +599,19 @@ const styles = StyleSheet.create({
   mapContainer: {
     position: 'relative',
   },
-  button: {
+  location: {
+    alignItems: 'center',
+    justifyContent: 'center',
     position: 'absolute',
-    backgroundColor: 'red',
     padding: 10,
     borderRadius: 10,
-    width: 40,
-    height: 40,
+    width: 80,
+    height: 80,
   },
-  buttonText: {
-    color: 'white',
+  locationText: {
+    color: 'black',
     fontWeight: 'bold',
+    fontSize: 30
   },
   circle: {
     width: 20,
