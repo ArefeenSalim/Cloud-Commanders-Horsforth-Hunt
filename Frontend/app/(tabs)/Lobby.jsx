@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, ScrollView, ActivityIndicator, TouchableOpacity, Alert } from 'react-native'
+import { View, Text, StyleSheet, TextInput, Button, ScrollView, ActivityIndicator, TouchableOpacity, Alert, } from 'react-native'
 import { Link, useRouter } from 'expo-router'
 import { getItem, clear } from "../../utils/AsyncStorage";
 import { StartGame } from "../../utils/API Functions/PatchGameIDStart";
@@ -25,7 +25,8 @@ const ComponentContainer = () => {
 
     const goBack = async () => {
       await close()
-      router.navigate('/index')
+      router.navigate('/')
+      clear()
     }
 
     async function startGameButton() {
@@ -111,9 +112,9 @@ const ComponentContainer = () => {
 
 
     return (
+      <View style={styles.scroll}>
       <ScrollView>
       <View style={styles.container}>
-        <TouchableOpacity onPress={goBack}><Text>""</Text></TouchableOpacity>
         <Text style={styles.text}>Lobby Name: {lobbyName}</Text>
         <Text style={styles.text}>Game ID: {lobbyData.gameId}</Text>
         <View style={styles.view}>
@@ -138,12 +139,26 @@ const ComponentContainer = () => {
         </View>
       </View>
       </ScrollView>
+      <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={styles.text2}>{"<--------"}</Text></TouchableOpacity>
+      </View>
     )
 }
 
 export default ComponentContainer;
 
 const styles = StyleSheet.create({
+    scroll: { flex: 1 },
+    backButton: {
+      backgroundColor: '#9977ff',
+      borderRadius: 5,
+      marginVertical: 20,
+      marginHorizontal: 20,
+      width: 100,
+      height: 40,
+      position: 'absolute',
+      top: 30,
+      left: 20,
+    },
     text2: {
       margin: 'auto',
       fontWeight: 'bold',
