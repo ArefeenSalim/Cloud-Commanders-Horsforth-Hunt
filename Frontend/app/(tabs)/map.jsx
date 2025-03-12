@@ -98,6 +98,22 @@ const MapPage = () => {
 };
 
 const styles = StyleSheet.create({
+  scroll: { flex: 1 },
+  backButton: {
+    backgroundColor: '#9977ff',
+    borderRadius: 5,
+    marginVertical: 20,
+    marginHorizontal: 20,
+    width: 100,
+    height: 40,
+    position: 'absolute',
+    top: 30,
+    left: 20,
+  },
+  text2: {
+    margin: 'auto',
+    fontWeight: 'bold',
+  },
   container: {
     flex: 1,
     backgroundColor: '#000000',

@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Platform } 
 import { useRouter, Link } from "expo-router";
 import React, { useState } from 'react'; 
 import { CreateGame } from '../../utils/API Functions/CreateGame'
-import { setItem, getItem } from '../../utils/AsyncStorage'
+import { setItem, getItem, clear } from '../../utils/AsyncStorage'
 
 // const router = useRouter(); // Get router instance
 // const [text, setText] = useState('');

@@ -3,7 +3,7 @@ import { useRouter } from "expo-router";
 import React, { useState } from 'react';
 import { AddPlayer } from '../../utils/API Functions/AddPlayer';
 import { CreateGame } from '../../utils/API Functions/CreateGame';
-import { setItem, getItem } from '../../utils/AsyncStorage'
+import { setItem, getItem, clear } from '../../utils/AsyncStorage'
 
 const router = useRouter(); // Get router instance
 const [text, setText] = useState('');
@@ -12,6 +12,12 @@ export default function UsernamePage() {
     const [text, setText] = useState('');
     const mapNumb = 801;
     let returnData;
+
+    const goBack = async () => {
+        await close()
+        router.navigate('/')
+        clear()
+    };
 
     const InitLobby = async (username) => {
         console.log("InitLobby Triggered")
@@ -75,11 +81,28 @@ export default function UsernamePage() {
             placeholder=""
             value={text}
             onChangeText={(newText) => setText(newText)}/>
+            <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={styles.text2}>{"<--------"}</Text></TouchableOpacity>
         </View>
     )
 }
 
 const styles = StyleSheet.create({
+    scroll: { flex: 1 },
+    text2: {
+        margin: 'auto',
+        fontWeight: 'bold',
+      },
+    backButton: {
+      backgroundColor: '#9977ff',
+      borderRadius: 5,
+      marginVertical: 20,
+      marginHorizontal: 20,
+      width: 100,
+      height: 40,
+      position: 'absolute',
+      top: 30,
+      left: 20,
+    },
     container: {
         backgroundColor: 'black',
     },
