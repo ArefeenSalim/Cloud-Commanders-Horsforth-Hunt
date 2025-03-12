@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform } from 'react-native'
 import React, { useState} from 'react'
 import { useRouter } from "expo-router";
 import { Link } from 'expo-router'
@@ -9,32 +9,39 @@ export default function index() {
   return (
     <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
       <Image
-       source={require('../../assets/images/logo.jpg')}
-       style={{
-         width: 300,
-         height: 300,
-         backgroundColor: 'transparent',
-         marginBottom: 20,
-       }}
-       />
-    
-    <View style={styles.buttonsContainer}>
-    <Link href="/lobby_code_page" style={styles.button}>
-      <Text style={styles.buttonText}>Join Game</Text>
-    </Link>
-    <Link href="/lobby_create_page" style={styles.button}>
-        <Text style={styles.buttonText}>Create Game</Text>
-    </Link>
-    <Link href="/game_page" style={styles.button}>
-        <Text style={styles.buttonText}>Load Game (TESTING)</Text>
-    </Link>
-    <Link href="/map" style={styles.button}>
-        <Text style={styles.buttonText}>Map page (TESTING)</Text>
-    </Link>
-    <Link href="/arefeenmap" style={styles.button}>
-        <Text style={styles.buttonText}>Arefeen Map page (TESTING)</Text>
-    </Link>
-    </View>
+        source={require('../../assets/images/logo.jpg')}
+        style={{
+          width: 300,
+          height: 300,
+          backgroundColor: 'transparent',
+          marginBottom: 20,
+        }}
+      />
+      {Platform.OS !== 'web' ? (
+        <View style={styles.buttonsContainer}>
+          <Link href="/lobby_code_page" style={styles.button}>
+            <Text style={styles.buttonText}>Join Game</Text>
+          </Link>
+          <Link href="/lobby_create_page" style={styles.button}>
+            <Text style={styles.buttonText}>Create Game</Text>
+          </Link>
+          <Link href="/game_page" style={styles.button}>
+            <Text style={styles.buttonText}>Load Game (TESTING)</Text>
+          </Link>
+          <Link href="/map" style={styles.button}>
+            <Text style={styles.buttonText}>Map page (TESTING)</Text>
+          </Link>
+        </View>) : (
+        <View style={styles.buttonsContainer}>
+        <Link href="/lobby_spectate_page" style={styles.button}>
+          <Text style={styles.buttonText}>Spectate Game</Text>
+        </Link>
+        {/* For Testing */}
+        <Link href="/lobby_code_page" style={styles.button}>
+          <Text style={styles.buttonText}>Join Game</Text>
+        </Link>
+        </View>
+      )}
     </View>
   )
 }

@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
   box: {
     width: '30%',  
     flexGrow: 1,
+    aspectRatio: 1,
     height: 'fill',
     marginBottom: 10,
     marginRight: 5,

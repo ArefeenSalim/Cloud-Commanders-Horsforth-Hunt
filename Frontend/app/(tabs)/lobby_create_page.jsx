@@ -11,12 +11,16 @@ import { setItem, getItem, clear } from '../../utils/AsyncStorage'
 export default function LobbyCodePage() {
   const router = useRouter(); // Get router instance
   const [text, setText] = useState('');
+  const [gameDuration, setGameDuration] = useState('short')
 
-  const goBack = async () => {
-    await close()
-    router.navigate('/')
-    clear()
+  const changeduration = async () => {
+    if (gameDuration === 'short') {
+      await setGameDuration('long')
+    } else {
+      await setGameDuration('short')
+    }
   }
+
 
   const becomeHost = async (lobbyName) => {
     if (lobbyName === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
@@ -24,6 +28,8 @@ export default function LobbyCodePage() {
     } else if (lobbyName != null || lobbyName != undefined) {
       await setItem('lobbyName', lobbyName)
       await setItem('isHost', true);
+      await setItem('localGameDuration', gameDuration);
+      console.log(await getItem('localGameDuration'))
       router.navigate('/username_page');
     };
   }
@@ -33,15 +39,19 @@ export default function LobbyCodePage() {
 
     <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
       <Text style={styles.lobbyText}>Enter Lobby Name Here:</Text>
-      <TouchableOpacity onPress={() => becomeHost(text)} style={styles.JoinButton}>
-        <Text style={styles.joinButtonText}>Create Game</Text>
-      </TouchableOpacity>
       <TextInput
         style={styles.textBox}
         placeholder=""
         value={text}
         onChangeText={(newText) => setText(newText)} />
-        <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={styles.text2}>{"<--------"}</Text></TouchableOpacity>
+      <View style={styles.container}>
+        <TouchableOpacity onPress={() => becomeHost(text)} style={styles.JoinButton}>
+          <Text style={styles.joinButtonText}>Create Game</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.JoinButton} onPress={() => changeduration()}>
+          <Text style={styles.joinButtonText}>Duration: {String(gameDuration).charAt(0).toUpperCase() + String(gameDuration).slice(1)}</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -49,21 +59,11 @@ export default function LobbyCodePage() {
 
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1 },
-  text2: {
-    margin: 'auto',
-    fontWeight: 'bold',
-  },
-  backButton: {
-    backgroundColor: '#9977ff',
-    borderRadius: 5,
-    marginVertical: 20,
-    marginHorizontal: 20,
-    width: 100,
-    height: 40,
-    position: 'absolute',
-    top: 30,
-    left: 20,
+  container: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    padding: 10,
   },
   JoinButton: {
     backgroundColor: '#DDDD91',
