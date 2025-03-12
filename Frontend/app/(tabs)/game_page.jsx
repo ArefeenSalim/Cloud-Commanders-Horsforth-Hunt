@@ -573,10 +573,11 @@ const panGesture = Gesture.Pan()
             ))}
           </Animated.View>
         </GestureDetector>
-      </View>
-      <TouchableOpacity onPress={(resetPosition)}>
-        <Text>Return Position</Text>
+        <TouchableOpacity style={[styles.returnButton, {position: 'absolute', right: 20, bottom: 20}]} onPress={(resetPosition)}>
+        <Text>Reset</Text>
+        <Text>Position</Text>
       </TouchableOpacity>
+      </View>
     </GestureHandlerRootView>
   );
 };
@@ -645,6 +646,12 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     width: 100,
     alignItems: 'center',
+  },
+  returnButton: {
+    backgroundColor: '#ff7f7f',
+    borderRadius: 10,
+    padding: 15,
+    width: 'auto',
   },
   ticketsButton: {
     backgroundColor: '#add8e6',
