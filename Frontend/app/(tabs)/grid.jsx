@@ -21,12 +21,11 @@ const textColourMapping = {
   null: 'black',
 };
 
+// Importable component that formats the movement history of Dr X into boxes to be displayed within a container
 const Grid = ({ fetchDrXMoveHis, boxesData }) => {
-    console.log("Grid received boxesData:", boxesData);
   
     const renderBoxes = () => {
       return boxesData.map((box, index) => {
-        console.log(`Rendering Box ${index}:`, box); // Properly logging each item
   
         const backgroundColor = box.ticket
         ? colourMapping[box.ticket] || "orange"
@@ -38,7 +37,7 @@ const Grid = ({ fetchDrXMoveHis, boxesData }) => {
 
         return (
           <TouchableOpacity
-            key={box.moveId}
+            key={box.round}
             style={[styles.box, { backgroundColor }]}
           >
             <Text style={[styles.boxText, {color: textColour}]}>{box.round}</Text>
@@ -47,14 +46,6 @@ const Grid = ({ fetchDrXMoveHis, boxesData }) => {
         );
       });
     };
-
-    // const withinList = () => {
-    //   return (
-    //     <FlatList
-    //     numColumns={3}
-    //     />
-    //   )
-    // }
   
     return (
     <View style={styles.gridContainer}>

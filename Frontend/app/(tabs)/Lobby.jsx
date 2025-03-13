@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, ScrollView, ActivityIndicator, TouchableOpacity, Alert, Platform } from 'react-native'
-import { Link, useRouter } from 'expo-router'
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity, Alert, Platform } from 'react-native'
+import { useRouter } from 'expo-router'
 import { getItem, clear } from "../../utils/AsyncStorage";
 import { StartGame } from "../../utils/API Functions/PatchGameIDStart";
 import { GetGameState } from "../../utils/API Functions/CheckGameState";
@@ -24,9 +24,8 @@ const ComponentContainer = () => {
   }
 
     const goBack = async () => {
-      await close()
+      await clear()
       router.navigate('/')
-      clear()
     }
 
     async function startGameButton() {
@@ -51,7 +50,6 @@ const ComponentContainer = () => {
             const result = await GetGameState(localGameID);
             if (result.success) {
                 setLobbyData(result.data);
-                console.log("Status: ", result.data.state);
                 if (result.data.state !== "Open" && result.data.state !== undefined) {
                   if (Platform.OS !== "web") {
                     router.navigate('/game_page');
@@ -114,7 +112,7 @@ const ComponentContainer = () => {
 
     return (
       <View style={styles.scroll}>
-      <ScrollView>
+      <ScrollView style={styles.scrollContainer}>
       <View style={styles.container}>
         <Text style={styles.text}>Lobby Name: {lobbyName}</Text>
         <Text style={styles.text}>Game ID: {lobbyData.gameId}</Text>
@@ -146,7 +144,7 @@ const ComponentContainer = () => {
         </View>
       </View>
       </ScrollView>
-      <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={styles.text2}>{"<--------"}</Text></TouchableOpacity>
+      <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={[{margin: 'auto',fontWeight: 'bold',}]}>{"<--------"}</Text></TouchableOpacity>
       </View>
     )
 }
@@ -154,7 +152,14 @@ const ComponentContainer = () => {
 export default ComponentContainer;
 
 const styles = StyleSheet.create({
-    scroll: { flex: 1 },
+    scrollContainer: {
+      flexGrow: 1,       
+      minHeight: '100%', 
+      backgroundColor: '#000000',
+    },
+    scroll: { 
+      flex: 1, 
+    },
     backButton: {
       backgroundColor: '#9977ff',
       borderRadius: 5,

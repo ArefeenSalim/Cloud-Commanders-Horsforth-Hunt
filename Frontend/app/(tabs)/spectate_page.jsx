@@ -1,22 +1,16 @@
 // specate_page.jsx
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Image, StyleSheet, TouchableOpacity, Text, Modal, ActivityIndicator, Dimensions, Alert } from 'react-native';
+import { View, Image, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Dimensions } from 'react-native';
 import { GestureHandlerRootView, GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withTiming,
-  withDecay,
-  clamp
 } from 'react-native-reanimated';
 import { GetMapData } from '../../utils/API Functions/GetMapData';
 import { GetGameState } from '../../utils/API Functions/CheckGameState';
-import { getItem, setItem, clear } from '../../utils/AsyncStorage';
-import { getPlayerDetails } from '../../utils/API Functions/GetPlayerDetail';
+import { getItem } from '../../utils/AsyncStorage';
 import { GetPlayerMoveHistory } from '../../utils/API Functions/GetPlayerMoveHistory';
-import { MakeMove } from '../../utils/API Functions/MakeMove';
-import { checkAndKickPlayer } from '../../utils/KickPlayer';
 import Grid from './grid';
 
 const { width, height } = Dimensions.get('window');
@@ -42,65 +36,73 @@ const gameDuration = {
 const MapViewer = () => {
   const [mapData, setMapData] = useState(null);
   const [playerLocations, setPlayerLocations] = useState([]);
-  const [tickets, setTickets] = useState([]);
   const [boxesData, setBoxesData] = useState([]);
-  const [chosenTicket, setChosenTicket] = useState(null);
   const [currentTurn, setCurrentTurn] = useState(null);
+  const [gameLength, setGameLength] = useState(null);
+  const [mapID, setMapID] = useState(null);
   const scale = useSharedValue(1);
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
-  const prevTranslationX = useSharedValue(0);
-  const prevTranslationY = useSharedValue(0);
-  const mapID = 801; //801;
+  const savedScale = useSharedValue(1);
+  const offset = useSharedValue({ x: 0, y: 0 });
+  const start = useSharedValue({ x: 0, y: 0 });
 
-  //Arefeen's Components Start
-  const [ticketsModalVisible, setTicketsModalVisible] = useState(false);
-  const [drXModalVisible, setDrXModalVisible] = useState(false);
 
-  const handleKick = async (targetPlayerId, playerName) => {
-    // Confirm wish to kick
-    Alert.alert(
-      `Kick Player ${playerName}`,
-      'Are you sure you want to kick?',
-      [
-        {
-          text: 'Yes',
-          onPress: await checkAndKickPlayer(targetPlayerId),
-          style: 'destructive'
-        },
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-      ],
-      {
-        cancelable: true,
-      },
-    )
+  useEffect(() => {
+    const handleWheel = (event) => {
+      const zoomSpeed = 0.1;
+      if (event.deltaY < 0) {
+        scale.value = Math.min(scale.value + zoomSpeed, 3); // Max zoom limit
+      } else {
+        scale.value = Math.max(scale.value - zoomSpeed, 0.5); // Min zoom limit
+      }
+    };
 
-    // Call the function that checks and potentially kicks the player
-    // await checkAndKickPlayer(targetPlayerId);
-  };
+    window.addEventListener('wheel', handleWheel);
 
-  //Arefeen Components End
+    // Cleanup the listener when component unmounts
+    return () => window.removeEventListener('wheel', handleWheel);
+  }, []);
 
   // Example buttons (x, y positions are relative to the map)
   useEffect(() => {
     const fetchData = async () => {
       try {
+        if (mapID) {
         const result = await GetMapData(mapID);
-        if (result.success) {
-          setMapData(result.data);
+        console.log("Result: ", result);
+        if (result.success && Array.isArray(result.data.locations)) {
+          const mapOffsets  = {
+            600: { x: -40, y: -40 },
+            903: { x: -40, y: -40 },
+            default: { x: 0, y: 0 },
+          };
+
+          const offset = mapOffsets[result.data.mapId] || mapOffsets.default;
+
+          const updatedLocations = {
+            ...result,
+            data: {
+                ...result.data,
+                locations: result.data.locations.map((location) => ({
+                    ...location,
+                    xPos: (location?.xPos ?? 0) + offset.x,
+                    yPos: (location?.yPos ?? 0) + offset.y,
+                })),
+            }
+          }
+          setMapData(updatedLocations.data);
         } else {
           console.error('Error:', result.error);
         }
+      } else {
+        console.log("Waiting for mapID to update")
+      }
       } catch (error) {
         console.error('Fetch error:', error);
       }
     };
 
     fetchData();
-  }, []);
+  }, [mapID]);
 
   // Polling function to get and update player location data on map.
   // Has been expanded to check the current game state and update that info
@@ -108,9 +110,16 @@ const MapViewer = () => {
     const intervalId = setInterval(async () => {
       try {
         fetchDrXMoveHis();
-        const result = await GetMapData(mapID);
-        if (result.success) {
-          const gameState = await GetGameState(await getItem('localGameID'))
+        const gameState = await GetGameState(await getItem('localGameID'))
+        if (gameState.success) {
+          
+
+          const gameLengthString = gameState.data.round + " / " + gameState.data.length
+          setGameLength(gameLengthString)
+
+          setMapID(gameState.data.mapId);
+          
+
           const currentTurn = gameState.data.state
           if (currentTurn === "Over") {
             const gameOver = currentTurn + '\n' + 'Winner: ' + gameState.data.winner;
@@ -118,33 +127,32 @@ const MapViewer = () => {
           } else {
             setCurrentTurn(currentTurn);
           }
+          const fugativeID = gameState.data.players[0].playerId
+          // Update fugative location if needed
+          if (fugativeID === await getItem('localPlayerId')) {
+            console.log("Inside Fugative ID check")
+            const fugativeMoveHistory = await GetPlayerMoveHistory(fugativeID);
+            if (!fugativeMoveHistory.data.moves || fugativeMoveHistory.data.moves.length === 0) {
+              gameState.data.players[0].location = fugativeMoveHistory.data.startLocation;
+            } else {
+              console.log("Local location: ", localLocation);
+              gameState.data.players[0].location = localLocation;
 
-          const colourOffsets = {
-            Clear: { x: -10, y: -10 },
-            Red: { x: 10, y: -10 },
-            Green: { x: -10, y: 10 },
-            Blue: { x: 10, y: 10 },
-            Yellow: { x: 10, y: 0 },
-            Black: { x: -10, y: 0 },
-            default: { x: 0, y: 0 },
-          };
+            }
+          }
 
           const defaultOffset = {x: 0, y:-40}
 
 
           // Create a new array with updated player positions
           const updatedPlayers = gameState.data.players.map((player, i) => {
-            const locationIndex = player.location - 1;
 
-            //const offset = colourOffsets[player.colour] || colourOffsets.default;
             const offset = defaultOffset;
 
             return {
               ...player, // Copy existing player data
               xPos: offset.x,
               yPos: offset.y,
-              //xPos: result.data.locations[locationIndex]?.xPos ?? 0,
-              //yPos: result.data.locations[locationIndex]?.yPos ?? 0,
             };
           });
 
@@ -160,48 +168,6 @@ const MapViewer = () => {
 
     return () => clearInterval(intervalId)
   }, []);
-
-  // useEffect(() => {
-  //   fetchDrXMoveHis();
-  // }, []);
-
-  // Function to check user's player data (e.g. tickets, role)
-  const getPlayerData = async () => {
-    try {
-      const result = await getPlayerDetails(await getItem('localPlayerId'));
-      if (result) {
-        return result;
-      } else {
-        console.error('Error:', result.error);
-      }
-    } catch (error) {
-      console.error('Fetch error:', error);
-    }
-  }
-
-  const filterTickets = async () => {
-    const playerData = await getPlayerData();  // Get player data asynchronously
-    const hideTickets = ["Detective"].includes(playerData.role);  // Check if the role is "Detective"
-    const ticketKeys = ['yellow', 'green', 'red', 'black', 'x2'];
-
-    const filteredData = Object.fromEntries(
-      Object.entries(playerData)
-        .filter(([key, value]) => ticketKeys.includes(key)) // Only include tickets with a count greater than 0
-    );
-
-    if (hideTickets) {
-      // Convert playerData to an array, filter out "black" and "x2" keys, and return the new object
-      const filteredTickets = Object.entries(filteredData)
-        .filter(([key, value]) => !["black", "x2"].includes(key))
-        .reduce((acc, [key, value]) => {
-          acc[key] = value;  // Rebuild the object
-          return acc;
-        }, {});
-      setTickets(filteredTickets);
-    } else {
-      setTickets(filteredData);  // Return original playerData if role is not "Detective"
-    }
-  }
 
   const filterData = (data) => {
     return data.map(item => {
@@ -245,7 +211,6 @@ const MapViewer = () => {
       const gameData = await GetGameState(gameID);
       const length = gameData.data.length + (Math.floor(gameData.data.length / 10));
       const filteredGameData = gameData.data.players[0];
-      console.log("Filtered playerID: ", filteredGameData.playerId)
       const fetchedData = await GetPlayerMoveHistory(filteredGameData.playerId);
       const moveHistory = fetchedData.data.moves;
       const filteredMoveHistory = filterData(moveHistory);
@@ -263,7 +228,7 @@ const MapViewer = () => {
       const mergedBoxes = defaultBoxes.map((defaultBox) => {
         // Find a move that matches the round
         const move = DrXDisplay.find((box) => box.round === defaultBox.round);
-        return move ? move : defaultBox;
+        return move || defaultBox;
       });
 
       setBoxesData(mergedBoxes);
@@ -274,80 +239,52 @@ const MapViewer = () => {
     }
   }, []);
 
-  let mapWidth = 0;
-  let mapHeight = 0;
-  if (mapData !== null) {
-    mapWidth = mapData.mapWidth;
-    mapHeight = mapData.mapHeight;
-  }
-
-  // Calculate boundaries for panning
-  let minX = -mapWidth //+ SCREEN_WIDTH; // Left boundary
-  let minY = -mapHeight //+ SCREEN_HEIGHT; // Top boundary
-  let maxX = mapWidth; // Right boundary
-  let maxY = mapHeight; // Bottom boundary
-
-  // Pinch (Zoom) Gesture
-  const pinchGesture = Gesture.Pinch().onUpdate((event) => {
-    scale.value = event.scale;
-
-    // Dynamically update the boundaries when zooming in or out
-    const newWidth = mapWidth * scale.value;
-    const newHeight = mapHeight * scale.value;
-
-    minX = -newWidth;
-    minY = -newHeight;
-    maxX = newWidth;
-    maxY = newHeight;
-  });
-
-  // Pan (Drag) Gesture with boundaries
   const panGesture = Gesture.Pan()
-    .onStart(() => {
-      prevTranslationX.value = translateX.value;
-      prevTranslationY.value = translateY.value;
-    })
-    .onUpdate((event) => {
-      // Restrict translation within boundaries
-      const newTranslationX = prevTranslationX.value + event.translationX;
-      const newTranslationY = prevTranslationY.value + event.translationY;
-
-      // Dynamically update boundaries based on the current map scale
-      const newWidth = mapWidth * scale.value;
-      const newHeight = mapHeight * scale.value;
-
-      const dynamicMinX = -newWidth;
-      const dynamicMinY = -newHeight;
-      const dynamicMaxX = newWidth;
-      const dynamicMaxY = newHeight;
-
-      // Restrict translation within boundaries
-      translateX.value = clamp(newTranslationX, dynamicMinX, dynamicMaxY);
-      translateY.value = clamp(newTranslationY, dynamicMinY, dynamicMaxX);
-    })
-    .onEnd((event) => {
-      // Smooth decay for natural movement
-      translateX.value = withDecay({
-        velocity: event.velocityX,
-        clamp: [minX, maxX],
+      .averageTouches(true)
+      .onUpdate((e) => {
+        const panSpeedMult = 3
+        offset.value = {
+          x: e.translationX * panSpeedMult + start.value.x,
+          y: e.translationY * panSpeedMult + start.value.y,
+        };
+      })
+      .onEnd(() => {
+        start.value = {
+          x: offset.value.x,
+          y: offset.value.y,
+        };
       });
-      translateY.value = withDecay({
-        velocity: event.velocityY,
-        clamp: [minY, maxY],
+  
+    const pinchGesture = Gesture.Pinch()
+      .onUpdate((event) => {
+        scale.value = savedScale.value * event.scale;
+      })
+      .onEnd(() => {
+        savedScale.value = scale.value;
       });
-    });
 
-  // Combine gestures
-  const combinedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
+      const resetPosition = () => {
+        offset.value = {
+          x: 0,
+          y: 0,
+        };
+        scale.value = 1;
+      }
+    
+  
 
-  // Apply transformations
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { scale: scale.value },
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-    ],
-  }));
+  
+    // Combine gestures
+    const combinedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
+
+    // Apply transformations
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [
+        { scale: scale.value },
+        { translateX: offset.value.x },
+        { translateY: offset.value.y },
+      ],
+    }));
 
   // Check if mapData is still loading
   if (mapData === null) {
@@ -365,6 +302,7 @@ const MapViewer = () => {
 
         {/* Text box displaying the current turn */}
         <View style={styles.turnBox}>
+          <Text style={styles.turnText}>Round: {gameLength}</Text>
           <Text style={styles.turnText}>Current Turn: {currentTurn}</Text>
         </View>
 
@@ -396,14 +334,14 @@ const MapViewer = () => {
               <View
                 key={loc.location}
                 style={[
-                  styles.button,
+                  styles.location,
                   {
                     left: loc.xPos,
                     top: loc.yPos,
                   },
                 ]}
               >
-                <Text style={styles.buttonText}>{loc.location}</Text>
+                <Text style={styles.locationText}>{loc.location}</Text>
                 {playerLocations
                   .filter((playerLoc) => {
                     return playerLoc.location !== "Hidden" && String(playerLoc.location) === String(loc.location)
@@ -423,16 +361,50 @@ const MapViewer = () => {
                   ))}
               </View>
             ))}
-
-            {/* Player Tokens */}
           </Animated.View>
         </GestureDetector>
+                <TouchableOpacity style={[styles.returnButton, {position: 'absolute', right: 20, bottom: 20}]} onPress={(resetPosition)}>
+                <Text>Reset</Text>
+                <Text>Position</Text>
+              </TouchableOpacity>
       </View>
+      <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={[{margin: 'auto',fontWeight: 'bold',}]}>{"<--------"}</Text></TouchableOpacity>
     </GestureHandlerRootView>
   );
 };
 
 const styles = StyleSheet.create({
+  backButton: {
+    backgroundColor: '#9977ff',
+    borderRadius: 5,
+    marginVertical: 20,
+    marginHorizontal: 20,
+    width: 100,
+    height: 40,
+    position: 'absolute',
+    top: 30,
+    left: 20,
+  },
+  returnButton: {
+    backgroundColor: '#ff7f7f',
+    borderRadius: 10,
+    padding: 15,
+    width: 'auto',
+  },
+  location: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    padding: 10,
+    borderRadius: 10,
+    width: 80,
+    height: 80,
+  },
+  locationText: {
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 30
+  },
   container: {
     flex: 1,
     backgroundColor: 'black',
@@ -468,19 +440,6 @@ const styles = StyleSheet.create({
     backgroundColor: "red",
     borderWidth: 1,
     borderColor: 'black',
-  },
-  overlayComponent: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '100%',
-    height: '100%',
-    zIndex: 10,  // Ensures it stays above other elements
-    pointerEvents: 'box-none',  // Allows touch events to pass through where needed
   },
   overlayButtonText: {
     color: '#000000',

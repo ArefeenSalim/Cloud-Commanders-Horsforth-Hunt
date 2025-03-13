@@ -1,6 +1,5 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform } from 'react-native'
-import React, { useState} from 'react'
-import { useRouter } from "expo-router";
+import { View, Text, StyleSheet, Platform } from 'react-native'
+import React from 'react'
 import { Link } from 'expo-router'
 import { Image } from 'react-native';
 

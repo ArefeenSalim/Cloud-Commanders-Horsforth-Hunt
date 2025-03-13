@@ -4,10 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { getMaps } from '../../utils/API Functions/GetMap'
 import { setItem, getItem, clear } from '../../utils/AsyncStorage'
 
-// const router = useRouter(); // Get router instance
-// const [text, setText] = useState('');
-
-
 export default function LobbyCodePage() {
   const router = useRouter(); // Get router instance
   const [text, setText] = useState('');
