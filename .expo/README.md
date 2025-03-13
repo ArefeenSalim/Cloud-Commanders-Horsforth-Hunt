@@ -12,10 +12,10 @@ Welcome to **Horsforth Hunt**, a thrilling mobile game created by **Cloud Comman
 
 ## Game Description
 
-**Horsforth Hunt** is a multiplayer strategy game where one player assumes the role of **Dr. X**, and the others are **detectives**. All players start from a unique point on the map. The map is visible to all players, but Dr. X’s movements are hidden. Dr. X can only be spotted by the detectives during specific turns when they move closer. The goal of the detectives is to predict Dr. X’s moves and catch him by landing on the same spot as Dr. X. Once this happens, the game ends.
+**Horsforth Hunt** is a multiplayer strategy game where one player assumes the role of **Dr. X**, and the others are **detectives**. All players start from a unique point on the map. The map is visible to all players, but Dr. X’s movements are hidden. Dr. X can only be spotted by the detectives during specific turns. The goal of the detectives is to predict Dr. X’s moves and catch him by landing on the same spot as Dr. X. Once this happens, the game ends.
 
-- **Dr. X’s Movement:** Dr. X moves secretly on the map, and his position is revealed only when a detective moves within range or during certain game events.
-- **Detective Strategy:** Detectives must predict Dr. X's next move by analyzing the map and narrowing down his location. The game becomes a battle of wits as they try to catch him before time runs out.
+- **Dr. X’s Movement:** Dr. X moves secretly on the map, and his position is revealed only when a detective moves at a certain turn.
+- **Detective Strategy:** Detectives must predict Dr. X's next move by analyzing the map and narrowing down his location. The game becomes a battle of wits as they try to catch Dr. X before rounds runs out.
 
 ## Map
 
