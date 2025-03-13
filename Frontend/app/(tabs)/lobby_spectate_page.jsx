@@ -3,10 +3,6 @@ import { useRouter, Link } from "expo-router";
 import React, { useState } from 'react';
 import { setItem } from '../../utils/AsyncStorage'; 
 
-
-const router = useRouter(); // Get router instance
-const [text, setText] = useState('');
-
 export default function LobbyCodePage() {
   const router = useRouter(); // Get router instance
   const [text, setText] = useState('');
@@ -41,7 +37,7 @@ export default function LobbyCodePage() {
     
     <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
       <Text style={styles.lobbyText}>Enter Lobby ID Here:</Text>
-      <Link href="start_game_page" onPress={() => saveLobbyID(text)} style={styles.JoinButton}>
+      <Link onPress={() => saveLobbyID(text)} style={styles.JoinButton}>
       <Text style={styles.joinButtonText}>Join Game</Text>
       </Link>
     <TextInput

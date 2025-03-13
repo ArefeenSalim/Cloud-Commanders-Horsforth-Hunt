@@ -2,17 +2,14 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, Text, Modal, ActivityIndicator, Dimensions, Alert } from 'react-native';
-import { GestureHandlerRootView, GestureDetector, Gesture, withSpring } from 'react-native-gesture-handler';
+import { GestureHandlerRootView, GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withTiming,
-  withDecay,
-  clamp
 } from 'react-native-reanimated';
 import { GetMapData } from '../../utils/API Functions/GetMapData';
 import { GetGameState } from '../../utils/API Functions/CheckGameState';
-import { getItem, setItem } from '../../utils/AsyncStorage';
+import { getItem } from '../../utils/AsyncStorage';
 import { getPlayerDetails } from '../../utils/API Functions/GetPlayerDetail';
 import { GetPlayerMoveHistory } from '../../utils/API Functions/GetPlayerMoveHistory';
 import { MakeMove } from '../../utils/API Functions/MakeMove';
@@ -50,10 +47,17 @@ const MapViewer = () => {
   const offset = useSharedValue({ x: 0, y: 0 });
   const start = useSharedValue({ x: 0, y: 0 });
 
-  //Arefeen's Components Start
+  //Arefeen's Modal Components
   const [ticketsModalVisible, setTicketsModalVisible] = useState(false);
   const [drXModalVisible, setDrXModalVisible] = useState(false);
 
+  // Return to Index Function
+  const goBack = async () => {
+    await clear()
+    router.navigate('/')
+  }
+
+  // Function for processing the kick request
   const handleKick = async (targetPlayerId, playerName) => {
     // Confirm wish to kick
     Alert.alert(
@@ -74,9 +78,6 @@ const MapViewer = () => {
         cancelable: true,
       },
     )
-
-    // Call the function that checks and potentially kicks the player
-    // await checkAndKickPlayer(targetPlayerId);
   };
 
   const handlePress1 = () => {
@@ -89,15 +90,15 @@ const MapViewer = () => {
     filterTickets();
   };
 
+  // Saves the ticket pressed on the ticket overlay to the page to be passed as parameters later when making a move.
   const handleTicketButtonPress = (ticket) => {
     console.log(`${ticket} button pressed`);
     setChosenTicket(ticket);
     setTicketsModalVisible(false); // Close the tickets modal
   };
 
-  //Arefeen Components End
-
-  const saveLocation = async (locationID) => {
+  // This function is used to activate a ticket and travel to the passed location
+  const activateTicket = async (locationID) => {
     console.log("Location Pressed: ", locationID)
     if (chosenTicket != null && locationID != null) {
       let playerID;
@@ -127,29 +128,7 @@ const MapViewer = () => {
     }
   }
 
-  // const getPlayerDetails = async() => {
-  //   const gameId = await getItem('localGameID')
-  //   try {
-  //     const result = await GetGameState(gameId);
-  //     if (result.success) {
-  //       gameData(result.data);
-  //     } else {
-  //       console.error('Error:', result.error);
-  //       return
-  //     }
-  //   } catch (error) {
-  //     console.error('Fetch error:', error);
-  //     return
-  //   }  
-  //   if (await getItem('LocalPlayerID') == gameData.players[0])  {
-
-  //   }
-  //   for (let i = 1; i < Object.keys(gameData.players); i++) {
-
-  //   }
-  // }
-
-  // Example buttons (x, y positions are relative to the map)
+  // Function for drawing the locations/nodes on the map
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -159,6 +138,7 @@ const MapViewer = () => {
         if (result.success && Array.isArray(result.data.locations)) {
           const mapOffsets  = {
             600: { x: -40, y: -40 },
+            903: { x: -40, y: -40 },
             default: { x: 0, y: 0 },
           };
 
@@ -226,37 +206,21 @@ const MapViewer = () => {
             }
           }
 
-          const colourOffsets = {
-            Clear: { x: -10, y: -10 },
-            Red: { x: 10, y: -10 },
-            Green: { x: -10, y: 10 },
-            Blue: { x: 10, y: 10 },
-            Yellow: { x: 10, y: 0 },
-            Black: { x: -10, y: 0 },
-            default: { x: 0, y: 0 },
-          };
-
           const defaultOffset = {x: 0, y:-40}
 
 
-          // Create a new array with updated player positions
+          // Maps the offset onto the player object so they can be positioned onto the map relative to the location
           const updatedPlayers = gameState.data.players.map((player, i) => {
-            const locationIndex = player.location - 1;
-
-            //const offset = colourOffsets[player.colour] || colourOffsets.default;
             const offset = defaultOffset;
 
             return {
               ...player, // Copy existing player data
               xPos: offset.x,
               yPos: offset.y,
-              //xPos: result.data.locations[locationIndex]?.xPos ?? 0,
-              //yPos: result.data.locations[locationIndex]?.yPos ?? 0,
             };
           });
 
           setPlayerLocations(updatedPlayers);
-          console.log("Player Position Fetch Completed", updatedPlayers)
         } else {
           console.error('Error:', result.error);
         }
@@ -267,10 +231,6 @@ const MapViewer = () => {
 
     return () => clearInterval(intervalId)
   }, [localLocation]);
-
-  // useEffect(() => {
-  //   fetchDrXMoveHis();
-  // }, []);
 
   // Function to check user's player data (e.g. tickets, role)
   const getPlayerData = async () => {
@@ -286,6 +246,7 @@ const MapViewer = () => {
     }
   }
 
+  // Function for dynamically loading tickets based on whether the player is detective or fugitive
   const filterTickets = async () => {
     const playerData = await getPlayerData();  // Get player data asynchronously
     const hideTickets = ["Detective"].includes(playerData.role);  // Check if the role is "Detective"
@@ -310,13 +271,15 @@ const MapViewer = () => {
     }
   }
 
-  const filterData = (data) => {
+  // Used for filtering out the moveId from an object, this case movement history
+  const filterMoveID = (data) => {
     return data.map(item => {
       const { moveId, ...filteredItem } = item;
       return filteredItem;
     });
   };
 
+  // Used to go through the movement history and add the destination of the move, used for the Dr.X move history display
   const filterAndModifyData = (data, targetIds) => {
     return data.map(({ moveId, ...filteredItem }) => ({
       ...filteredItem,
@@ -324,6 +287,7 @@ const MapViewer = () => {
     }));
   };
 
+  // Since double tickets activate on the same round, this function makes it so rounds are unique by incrementing any repeat rounds, so they are unique and representative of number of moves done
   function adjustRounds(moves) {
     let roundMap = new Map(); // Stores the next available round for each seen round
 
@@ -346,6 +310,7 @@ const MapViewer = () => {
     return adjustedMoves;
   }
 
+  // Function for getting the movement history of Dr X to be passed into a component so it can be displayed. 
   const fetchDrXMoveHis = useCallback(async () => {
     try {
       const gameID = await getItem('localGameID');
@@ -355,7 +320,7 @@ const MapViewer = () => {
       console.log("Filtered playerID: ", filteredGameData.playerId)
       const fetchedData = await GetPlayerMoveHistory(filteredGameData.playerId);
       const moveHistory = fetchedData.data.moves;
-      const filteredMoveHistory = filterData(moveHistory);
+      const filteredMoveHistory = filterMoveID(moveHistory);
 
       const revealRounds = [3, 8, 13, 18, 24];
       const reformatDoubleMoves = adjustRounds(filteredMoveHistory);
@@ -388,7 +353,7 @@ const MapViewer = () => {
     mapHeight = mapData.mapHeight;
   }
 
-
+// Allows for dragging the map along
 const panGesture = Gesture.Pan()
     .averageTouches(true)
     .onUpdate((e) => {
@@ -404,7 +369,7 @@ const panGesture = Gesture.Pan()
         y: offset.value.y,
       };
     });
-
+// For zooming in and out of the map
   const pinchGesture = Gesture.Pinch()
     .onUpdate((event) => {
       scale.value = savedScale.value * event.scale;
@@ -412,7 +377,7 @@ const panGesture = Gesture.Pan()
     .onEnd(() => {
       savedScale.value = scale.value;
     });
-
+// Returning back to original scale/x-y view
   const resetPosition = () => {
     offset.value = {
       x: 0,
@@ -421,7 +386,7 @@ const panGesture = Gesture.Pan()
     scale.value = 1;
   }
 
-  // Combine gestures
+  // Combine gestures so they can be used 
   const combinedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
 
   // Apply transformations
@@ -435,7 +400,6 @@ const panGesture = Gesture.Pan()
 
   // Check if mapData is still loading
   if (mapData === null) {
-    console.log("Map ID: ", mapID)
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#00ff00" />
@@ -454,7 +418,7 @@ const panGesture = Gesture.Pan()
         </View>
         { /* Arefeen's Component Code */}
 
-        <View style={styles.overlayComponent}>
+        <View style={[styles.overlayComponent]}>
           {/* Dr X Button (Left Side) */}
           <View style={styles.leftButtonContainer}>
             <TouchableOpacity style={styles.drXButton} onPress={handlePress1}>
@@ -527,7 +491,7 @@ const panGesture = Gesture.Pan()
         {/* Mark's Map Code */}
         <GestureDetector gesture={combinedGesture}>
           <Animated.View style={[styles.mapContainer, animatedStyle, { position: 'absolute' }]}>
-            {/* Map Locations */}
+            {/* Map Image */}
             <Image
               source={{ uri: mapData.mapImage }}
               style={{
@@ -548,9 +512,12 @@ const panGesture = Gesture.Pan()
                     top: loc.yPos,
                   },
                 ]}
-                onPress={() => saveLocation(loc.location)}
+                onPress={() => activateTicket(loc.location)}
               >
                 <Text style={styles.locationText}>{loc.location}</Text>
+
+                {/* Player Icons */}
+
                 {playerLocations
                   .filter((playerLoc) => {
                     return playerLoc.location !== "Hidden" && String(playerLoc.location) === String(loc.location)
@@ -578,11 +545,23 @@ const panGesture = Gesture.Pan()
         <Text>Position</Text>
       </TouchableOpacity>
       </View>
+      <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={[{margin: 'auto',fontWeight: 'bold',}]}>{"<--------"}</Text></TouchableOpacity>
     </GestureHandlerRootView>
   );
 };
 
 const styles = StyleSheet.create({
+  backButton: {
+    backgroundColor: '#9977ff',
+    borderRadius: 5,
+    marginVertical: 20,
+    marginHorizontal: 20,
+    width: 100,
+    height: 40,
+    position: 'absolute',
+    top: 30,
+    left: 20,
+  },
   container: {
     flex: 1,
     backgroundColor: 'black',

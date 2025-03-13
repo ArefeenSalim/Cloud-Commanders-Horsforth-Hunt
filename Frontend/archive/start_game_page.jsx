@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet, TextInput, ActivityIndicator, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native'
 import { useRouter, Link } from "expo-router";
 import React, { useState, useEffect } from 'react';
 import { getItem, setItem } from "../../utils/AsyncStorage";

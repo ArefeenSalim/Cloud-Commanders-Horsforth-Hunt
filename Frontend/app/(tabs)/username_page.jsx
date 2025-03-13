@@ -5,10 +5,8 @@ import { AddPlayer } from '../../utils/API Functions/AddPlayer';
 import { CreateGame } from '../../utils/API Functions/CreateGame';
 import { setItem, getItem, clear } from '../../utils/AsyncStorage'
 
-const router = useRouter(); // Get router instance
-const [text, setText] = useState('');
-
 export default function UsernamePage() {
+    const router = useRouter(); // Get router instance
     const [text, setText] = useState('');
     let returnData;
 

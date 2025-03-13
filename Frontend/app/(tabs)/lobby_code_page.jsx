@@ -3,10 +3,6 @@ import { useRouter, Link } from "expo-router";
 import React, { useState } from 'react';
 import { setItem, clear } from '../../utils/AsyncStorage'; 
 
-
-const router = useRouter(); // Get router instance
-const [text, setText] = useState('');
-
 export default function LobbyCodePage() {
   const router = useRouter(); // Get router instance
   const [text, setText] = useState('');
