@@ -135,35 +135,35 @@ const MapViewer = () => {
     const fetchData = async () => {
       try {
         if (mapID) {
-        const result = await GetMapData(mapID);
-        console.log("Result: ", result);
-        if (result.success && Array.isArray(result.data.locations)) {
-          const mapOffsets  = {
-            600: { x: -40, y: -40 },
-            903: { x: -40, y: -40 },
-            default: { x: 0, y: 0 },
-          };
+          const result = await GetMapData(mapID);
+          console.log("Result: ", result);
+          if (result.success && Array.isArray(result.data.locations)) {
+            const mapOffsets = {
+              600: { x: -40, y: -40 },
+              903: { x: -40, y: -40 },
+              default: { x: 0, y: 0 },
+            };
 
-          const offset = mapOffsets[result.data.mapId] || mapOffsets.default;
+            const offset = mapOffsets[result.data.mapId] || mapOffsets.default;
 
-          const updatedLocations = {
-            ...result,
-            data: {
+            const updatedLocations = {
+              ...result,
+              data: {
                 ...result.data,
                 locations: result.data.locations.map((location) => ({
-                    ...location,
-                    xPos: (location?.xPos ?? 0) + offset.x,
-                    yPos: (location?.yPos ?? 0) + offset.y,
+                  ...location,
+                  xPos: (location?.xPos ?? 0) + offset.x,
+                  yPos: (location?.yPos ?? 0) + offset.y,
                 })),
+              }
             }
+            setMapData(updatedLocations.data);
+          } else {
+            console.error('Error:', result.error);
           }
-          setMapData(updatedLocations.data);
         } else {
-          console.error('Error:', result.error);
+          console.log("Waiting for mapID to update")
         }
-      } else {
-        console.log("Waiting for mapID to update")
-      }
       } catch (error) {
         console.error('Fetch error:', error);
       }
@@ -179,13 +179,13 @@ const MapViewer = () => {
       try {
         const gameState = await GetGameState(await getItem('localGameID'))
         if (gameState.success) {
-          
+
 
           const gameLengthString = gameState.data.round + " / " + gameState.data.length
           setGameLength(gameLengthString)
 
           setMapID(gameState.data.mapId);
-          
+
 
           const currentTurn = gameState.data.state
           if (currentTurn === "Over") {
@@ -208,7 +208,7 @@ const MapViewer = () => {
             }
           }
 
-          const defaultOffset = {x: 0, y:-40}
+          const defaultOffset = { x: 0, y: -120 }
 
 
           // Maps the offset onto the player object so they can be positioned onto the map relative to the location
@@ -355,8 +355,8 @@ const MapViewer = () => {
     mapHeight = mapData.mapHeight;
   }
 
-// Allows for dragging the map along
-const panGesture = Gesture.Pan()
+  // Allows for dragging the map along
+  const panGesture = Gesture.Pan()
     .averageTouches(true)
     .onUpdate((e) => {
       const panSpeedMult = 3
@@ -371,7 +371,7 @@ const panGesture = Gesture.Pan()
         y: offset.value.y,
       };
     });
-// For zooming in and out of the map
+  // For zooming in and out of the map
   const pinchGesture = Gesture.Pinch()
     .onUpdate((event) => {
       scale.value = savedScale.value * event.scale;
@@ -379,13 +379,18 @@ const panGesture = Gesture.Pan()
     .onEnd(() => {
       savedScale.value = scale.value;
     });
-// Returning back to original scale/x-y view
+  // Returning back to original scale/x-y view
   const resetPosition = () => {
+    start.value = {
+      x: 0,
+      y: 0,
+    };
     offset.value = {
       x: 0,
       y: 0,
     };
     scale.value = 1;
+    savedScale.value = 1;
   }
 
   // Combine gestures so they can be used 
@@ -400,7 +405,7 @@ const panGesture = Gesture.Pan()
     ],
   }));
 
-  // Check if mapData is still loading
+  // Check if mapData is still loading, if so, then a loading icon will appear
   if (mapData === null) {
     return (
       <View style={styles.container}>
@@ -432,10 +437,6 @@ const panGesture = Gesture.Pan()
             <TouchableOpacity style={styles.ticketsButton} onPress={handlePress2}>
               <Text style={styles.overlayButtonText}>Tickets</Text>
             </TouchableOpacity>
-          </View>
-
-          <View style={styles.backToHome}>
-          <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={styles.text2}>{"<--------"}</Text></TouchableOpacity>
           </View>
 
           {/* Dr X Modal (Grey Pop-up) */}
@@ -539,18 +540,18 @@ const panGesture = Gesture.Pan()
                         },
                       ]}
                       onPress={() => handleKick(playerLoc.playerId, playerLoc.playerName)}
-                      ></TouchableOpacity>
+                    ></TouchableOpacity>
                   ))}
               </TouchableOpacity>
             ))}
           </Animated.View>
         </GestureDetector>
-        <TouchableOpacity style={[styles.returnButton, {position: 'absolute', right: 20, bottom: 20}]} onPress={(resetPosition)}>
-        <Text>Reset</Text>
-        <Text>Position</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={[styles.returnButton, { position: 'absolute', right: 20, bottom: 20 }]} onPress={(resetPosition)}>
+          <Text>Reset</Text>
+          <Text>Position</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={[{margin: 'auto',fontWeight: 'bold',}]}>{"<--------"}</Text></TouchableOpacity>
+      <TouchableOpacity style={styles.backButton} onPress={goBack}><Text style={[{ margin: 'auto', fontWeight: 'bold', }]}>{"<--------"}</Text></TouchableOpacity>
     </GestureHandlerRootView>
   );
 };
@@ -559,13 +560,12 @@ const styles = StyleSheet.create({
   backButton: {
     backgroundColor: '#9977ff',
     borderRadius: 5,
-    marginVertical: 20,
-    marginHorizontal: 20,
-    width: 100,
+    width: 80,
     height: 40,
     position: 'absolute',
-    top: 30,
-    left: 20,
+    top: 10,
+    left: 10,
+    zIndex: 10,
   },
   container: {
     flex: 1,
@@ -598,9 +598,9 @@ const styles = StyleSheet.create({
     fontSize: 30
   },
   circle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "red",
     borderWidth: 1,
     borderColor: 'black',

@@ -7,32 +7,16 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
 } from 'react-native-reanimated';
+import { useRouter } from "expo-router";
 import { GetMapData } from '../../utils/API Functions/GetMapData';
 import { GetGameState } from '../../utils/API Functions/CheckGameState';
-import { getItem } from '../../utils/AsyncStorage';
+import { getItem, clear } from '../../utils/AsyncStorage';
 import { GetPlayerMoveHistory } from '../../utils/API Functions/GetPlayerMoveHistory';
 import Grid from './grid';
 
 const { width, height } = Dimensions.get('window');
-const colourMapping = {
-  yellow: 'yellow',
-  green: 'green',
-  red: 'red',
-  black: 'black',
-  x2: '#ff6347'
-};
-const textColourMapping = {
-  yellow: 'black',
-  green: 'black',
-  red: 'black',
-  black: 'white',
-  x2: 'black'
-};
-const gameDuration = {
-  short: 13,
-  long: 22,
-};
 
+// Function for viewing the game from the website, to spectate and see the game be played.
 const MapViewer = () => {
   const [mapData, setMapData] = useState(null);
   const [playerLocations, setPlayerLocations] = useState([]);
@@ -40,19 +24,26 @@ const MapViewer = () => {
   const [currentTurn, setCurrentTurn] = useState(null);
   const [gameLength, setGameLength] = useState(null);
   const [mapID, setMapID] = useState(null);
-  const scale = useSharedValue(1);
+  const router = useRouter(); // Get router instance
+  const scale = useSharedValue(2);
   const savedScale = useSharedValue(1);
   const offset = useSharedValue({ x: 0, y: 0 });
   const start = useSharedValue({ x: 0, y: 0 });
 
+  // Function for returning to index/home
+  const goBack = async () => {
+    await clear()
+    router.navigate('/')
+  }
 
+  // Hook for generating a listener for when wheel is used, to scroll in and out of the map to change the scale.
   useEffect(() => {
     const handleWheel = (event) => {
       const zoomSpeed = 0.1;
       if (event.deltaY < 0) {
-        scale.value = Math.min(scale.value + zoomSpeed, 3); // Max zoom limit
+        scale.value = Math.min(scale.value + zoomSpeed, 5);
       } else {
-        scale.value = Math.max(scale.value - zoomSpeed, 0.5); // Min zoom limit
+        scale.value = Math.max(scale.value - zoomSpeed, 0.1);
       }
     };
 
@@ -62,40 +53,40 @@ const MapViewer = () => {
     return () => window.removeEventListener('wheel', handleWheel);
   }, []);
 
-  // Example buttons (x, y positions are relative to the map)
+  // Function for drawing the locations/nodes on the map
   useEffect(() => {
     const fetchData = async () => {
       try {
         if (mapID) {
-        const result = await GetMapData(mapID);
-        console.log("Result: ", result);
-        if (result.success && Array.isArray(result.data.locations)) {
-          const mapOffsets  = {
-            600: { x: -40, y: -40 },
-            903: { x: -40, y: -40 },
-            default: { x: 0, y: 0 },
-          };
+          const result = await GetMapData(mapID);
+          console.log("Result: ", result);
+          if (result.success && Array.isArray(result.data.locations)) {
+            const mapOffsets = {
+              600: { x: -40, y: -40 },
+              903: { x: -40, y: -40 },
+              default: { x: 0, y: 0 },
+            };
 
-          const offset = mapOffsets[result.data.mapId] || mapOffsets.default;
+            const offset = mapOffsets[result.data.mapId] || mapOffsets.default;
 
-          const updatedLocations = {
-            ...result,
-            data: {
+            const updatedLocations = {
+              ...result,
+              data: {
                 ...result.data,
                 locations: result.data.locations.map((location) => ({
-                    ...location,
-                    xPos: (location?.xPos ?? 0) + offset.x,
-                    yPos: (location?.yPos ?? 0) + offset.y,
+                  ...location,
+                  xPos: (location?.xPos ?? 0) + offset.x,
+                  yPos: (location?.yPos ?? 0) + offset.y,
                 })),
+              }
             }
+            setMapData(updatedLocations.data);
+          } else {
+            console.error('Error:', result.error);
           }
-          setMapData(updatedLocations.data);
         } else {
-          console.error('Error:', result.error);
+          console.log("Waiting for mapID to update")
         }
-      } else {
-        console.log("Waiting for mapID to update")
-      }
       } catch (error) {
         console.error('Fetch error:', error);
       }
@@ -109,16 +100,16 @@ const MapViewer = () => {
   useEffect(() => {
     const intervalId = setInterval(async () => {
       try {
-        fetchDrXMoveHis();
+        fetchDrXMoveHis(); // Needed so that the Dr.X Move History can update as it is no longer being called when opened like in the game_page
         const gameState = await GetGameState(await getItem('localGameID'))
         if (gameState.success) {
-          
+
 
           const gameLengthString = gameState.data.round + " / " + gameState.data.length
           setGameLength(gameLengthString)
 
           setMapID(gameState.data.mapId);
-          
+
 
           const currentTurn = gameState.data.state
           if (currentTurn === "Over") {
@@ -141,10 +132,10 @@ const MapViewer = () => {
             }
           }
 
-          const defaultOffset = {x: 0, y:-40}
+          const defaultOffset = { x: 0, y: -100 }
 
 
-          // Create a new array with updated player positions
+          // Maps the offset onto the player object so they can be positioned onto the map relative to the location
           const updatedPlayers = gameState.data.players.map((player, i) => {
 
             const offset = defaultOffset;
@@ -169,13 +160,15 @@ const MapViewer = () => {
     return () => clearInterval(intervalId)
   }, []);
 
-  const filterData = (data) => {
+  // Used for filtering out the moveId from an object, this case movement history
+  const filterMoveID = (data) => {
     return data.map(item => {
       const { moveId, ...filteredItem } = item;
       return filteredItem;
     });
   };
 
+  // Used to go through the movement history and add the destination of the move, used for the Dr.X move history display
   const filterAndModifyData = (data, targetIds) => {
     return data.map(({ moveId, ...filteredItem }) => ({
       ...filteredItem,
@@ -183,6 +176,7 @@ const MapViewer = () => {
     }));
   };
 
+  // Since double tickets activate on the same round, this function makes it so rounds are unique by incrementing any repeat rounds, so they are unique and representative of number of moves done
   function adjustRounds(moves) {
     let roundMap = new Map(); // Stores the next available round for each seen round
 
@@ -205,6 +199,7 @@ const MapViewer = () => {
     return adjustedMoves;
   }
 
+  // Function for getting the movement history of Dr X to be passed into a component so it can be displayed. 
   const fetchDrXMoveHis = useCallback(async () => {
     try {
       const gameID = await getItem('localGameID');
@@ -213,7 +208,7 @@ const MapViewer = () => {
       const filteredGameData = gameData.data.players[0];
       const fetchedData = await GetPlayerMoveHistory(filteredGameData.playerId);
       const moveHistory = fetchedData.data.moves;
-      const filteredMoveHistory = filterData(moveHistory);
+      const filteredMoveHistory = filterMoveID(moveHistory);
 
       const revealRounds = [3, 8, 13, 18, 24];
       const reformatDoubleMoves = adjustRounds(filteredMoveHistory);
@@ -239,54 +234,60 @@ const MapViewer = () => {
     }
   }, []);
 
+  // Allows for dragging the map along
   const panGesture = Gesture.Pan()
-      .averageTouches(true)
-      .onUpdate((e) => {
-        const panSpeedMult = 3
-        offset.value = {
-          x: e.translationX * panSpeedMult + start.value.x,
-          y: e.translationY * panSpeedMult + start.value.y,
-        };
-      })
-      .onEnd(() => {
-        start.value = {
-          x: offset.value.x,
-          y: offset.value.y,
-        };
-      });
-  
-    const pinchGesture = Gesture.Pinch()
-      .onUpdate((event) => {
-        scale.value = savedScale.value * event.scale;
-      })
-      .onEnd(() => {
-        savedScale.value = scale.value;
-      });
+    .averageTouches(true)
+    .onUpdate((e) => {
+      const panSpeedMult = 3
+      offset.value = {
+        x: e.translationX * panSpeedMult + start.value.x,
+        y: e.translationY * panSpeedMult + start.value.y,
+      };
+    })
+    .onEnd(() => {
+      start.value = {
+        x: offset.value.x,
+        y: offset.value.y,
+      };
+    });
+  // For zooming in and out of the map
+  const pinchGesture = Gesture.Pinch()
+    .onUpdate((event) => {
+      scale.value = savedScale.value * event.scale;
+    })
+    .onEnd(() => {
+      savedScale.value = scale.value;
+    });
+  // Returning back to original scale/x-y view
+  const resetPosition = () => {
+    start.value = {
+      x: 0,
+      y: 0,
+    };
+    offset.value = {
+      x: 0,
+      y: 0,
+    };
+    scale.value = 1;
+    savedScale.value = 1;
+  }
 
-      const resetPosition = () => {
-        offset.value = {
-          x: 0,
-          y: 0,
-        };
-        scale.value = 1;
-      }
-    
-  
 
-  
-    // Combine gestures
-    const combinedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
 
-    // Apply transformations
-    const animatedStyle = useAnimatedStyle(() => ({
-      transform: [
-        { scale: scale.value },
-        { translateX: offset.value.x },
-        { translateY: offset.value.y },
-      ],
-    }));
 
-  // Check if mapData is still loading
+  // Combine gestures
+  const combinedGesture = Gesture.Simultaneous(pinchGesture, panGesture);
+
+  // Apply transformations
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { scale: scale.value },
+      { translateX: offset.value.x },
+      { translateY: offset.value.y },
+    ],
+  }));
+
+  // Check if mapData is still loading, if it is, then a loading icon will appear
   if (mapData === null) {
     return (
       <View style={styles.container}>
@@ -297,7 +298,7 @@ const MapViewer = () => {
 
   return (
     <GestureHandlerRootView>
-        
+
       <View style={styles.container}>
 
         {/* Text box displaying the current turn */}
@@ -306,16 +307,14 @@ const MapViewer = () => {
           <Text style={styles.turnText}>Current Turn: {currentTurn}</Text>
         </View>
 
-        { /* Arefeen's Component Code */}
-
-        {/* Dr X Modal Container, trying to get to fixed to the leftside */}
+        {/* Dr X Move History Container, fixed to the leftside */}
         <View style={styles.modalOverlay} onLayout={(event) => console.log('Modal Overlay height:', event.nativeEvent.layout.height)}>
-              <View style={styles.drXModalContainer} onLayout={(event) => console.log('Modal height:', event.nativeEvent.layout.height)}>
-                <Text style={styles.modalTitle}>Dr X Movements</Text>
-                <Grid fetchDrXMoveHis={fetchDrXMoveHis} boxesData={boxesData} />
-              </View>
-            </View>
-            
+          <View style={styles.drXModalContainer} onLayout={(event) => console.log('Modal height:', event.nativeEvent.layout.height)}>
+            <Text style={styles.modalTitle}>Dr X Movements</Text>
+            <Grid fetchDrXMoveHis={fetchDrXMoveHis} boxesData={boxesData} />
+          </View>
+        </View>
+
         {/* Mark's Map Code */}
         <GestureDetector gesture={combinedGesture}>
           <Animated.View style={[styles.mapContainer, animatedStyle, { position: 'absolute' }]}>
@@ -326,7 +325,7 @@ const MapViewer = () => {
                 width: mapData.mapWidth,
                 height: mapData.mapHeight,
               }}
-              resizeMode="contain"
+              resizeMode="cover"
             />
 
             {/* Map Locations */}
@@ -341,6 +340,9 @@ const MapViewer = () => {
                   },
                 ]}
               >
+
+                {/* Player Icons */}
+
                 <Text style={styles.locationText}>{loc.location}</Text>
                 {playerLocations
                   .filter((playerLoc) => {
@@ -357,18 +359,18 @@ const MapViewer = () => {
                           backgroundColor: playerLoc.colour.toLowerCase() === "clear" ? "purple" : playerLoc.colour.toLowerCase(),
                         },
                       ]}
-                      ></View>
+                    ></View>
                   ))}
               </View>
             ))}
           </Animated.View>
         </GestureDetector>
-                <TouchableOpacity style={[styles.returnButton, {position: 'absolute', right: 20, bottom: 20}]} onPress={(resetPosition)}>
-                <Text>Reset</Text>
-                <Text>Position</Text>
-              </TouchableOpacity>
+        <TouchableOpacity style={[styles.returnButton, { position: 'absolute', right: 20, bottom: 20 }]} onPress={(resetPosition)}>
+          <Text>Reset</Text>
+          <Text>Position</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={[{margin: 'auto',fontWeight: 'bold',}]}>{"<--------"}</Text></TouchableOpacity>
+      <TouchableOpacity style={styles.backButton} onPress={goBack}><Text style={[{ margin: 'auto', fontWeight: 'bold', }]}>{"<--------"}</Text></TouchableOpacity>
     </GestureHandlerRootView>
   );
 };
@@ -434,9 +436,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   circle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "red",
     borderWidth: 1,
     borderColor: 'black',
@@ -484,8 +486,8 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   drXModalContainer: {
-    width: '50%',  
-    height: '80%', 
+    width: '50%',
+    height: '80%',
     backgroundColor: 'white',
     padding: 10,
     borderRadius: 10,
