@@ -146,17 +146,13 @@ const MapViewer = () => {
 
           // Create a new array with updated player positions
           const updatedPlayers = gameState.data.players.map((player, i) => {
-            const locationIndex = player.location - 1;
 
-            //const offset = colourOffsets[player.colour] || colourOffsets.default;
             const offset = defaultOffset;
 
             return {
               ...player, // Copy existing player data
               xPos: offset.x,
               yPos: offset.y,
-              //xPos: result.data.locations[locationIndex]?.xPos ?? 0,
-              //yPos: result.data.locations[locationIndex]?.yPos ?? 0,
             };
           });
 
@@ -232,7 +228,7 @@ const MapViewer = () => {
       const mergedBoxes = defaultBoxes.map((defaultBox) => {
         // Find a move that matches the round
         const move = DrXDisplay.find((box) => box.round === defaultBox.round);
-        return move ? move : defaultBox;
+        return move || defaultBox;
       });
 
       setBoxesData(mergedBoxes);
@@ -242,13 +238,6 @@ const MapViewer = () => {
       console.log('Error: ', error);
     }
   }, []);
-
-  let mapWidth = 0;
-  let mapHeight = 0;
-  if (mapData !== null) {
-    mapWidth = mapData.mapWidth;
-    mapHeight = mapData.mapHeight;
-  }
 
   const panGesture = Gesture.Pan()
       .averageTouches(true)

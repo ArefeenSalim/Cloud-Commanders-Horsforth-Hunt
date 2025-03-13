@@ -9,12 +9,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { GetMapData } from '../../utils/API Functions/GetMapData';
 import { GetGameState } from '../../utils/API Functions/CheckGameState';
-import { getItem } from '../../utils/AsyncStorage';
+import { getItem, clear } from '../../utils/AsyncStorage';
 import { getPlayerDetails } from '../../utils/API Functions/GetPlayerDetail';
 import { GetPlayerMoveHistory } from '../../utils/API Functions/GetPlayerMoveHistory';
 import { MakeMove } from '../../utils/API Functions/MakeMove';
 import { checkAndKickPlayer } from '../../utils/KickPlayer';
 import Grid from './grid';
+import { useRouter } from 'expo-router'
 
 const { width, height } = Dimensions.get('window');
 const colourMapping = {
@@ -42,6 +43,7 @@ const MapViewer = () => {
   const [currentTurn, setCurrentTurn] = useState(null);
   const [gameLength, setGameLength] = useState(null);
   const [mapID, setMapID] = useState(null);
+  const router = useRouter(); // Get router instance
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
   const offset = useSharedValue({ x: 0, y: 0 });
@@ -410,7 +412,6 @@ const panGesture = Gesture.Pan()
   return (
     <GestureHandlerRootView>
       <View style={styles.container}>
-
         {/* Text box displaying the current turn */}
         <View style={styles.turnBox}>
           <Text style={styles.turnText}>Round: {gameLength}</Text>
@@ -431,6 +432,10 @@ const panGesture = Gesture.Pan()
             <TouchableOpacity style={styles.ticketsButton} onPress={handlePress2}>
               <Text style={styles.overlayButtonText}>Tickets</Text>
             </TouchableOpacity>
+          </View>
+
+          <View style={styles.backToHome}>
+          <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={styles.text2}>{"<--------"}</Text></TouchableOpacity>
           </View>
 
           {/* Dr X Modal (Grey Pop-up) */}
