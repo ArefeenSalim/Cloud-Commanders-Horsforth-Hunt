@@ -5,47 +5,47 @@ import { AddPlayer } from '../../utils/API Functions/AddPlayer';
 import { CreateGame } from '../../utils/API Functions/CreateGame';
 import { setItem, getItem, clear } from '../../utils/AsyncStorage'
 
+// Page for handling the username input from users, and then handle the functions to create and/or join a lobby.
 export default function UsernamePage() {
     const router = useRouter(); // Get router instance
     const [text, setText] = useState('');
     let returnData;
 
+    // Function to return back to the index/home page
     const goBack = async () => {
-        await close()
+        await clear()
         router.navigate('/')
-        clear()
     };
 
+    // Main function, checks to see whether the user is trying to join or create a game, then calls upon the necessary API calls to create the game (if player is host) and join a game
     const InitLobby = async (username) => {
-        console.log("InitLobby Triggered Change")
         console.log(await getItem('targetMap'))
         if (username === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
             Alert.alert('Error', 'Input Username');
             return;
         } else if ((username != null || username != undefined) && await getItem('isHost')) {
 
-                  try {
-                  const gameDuration = await getItem('localGameDuration');
-                  console.log("This is targetMap: ", await getItem('targetMap'))
+            try {
+                const gameDuration = await getItem('localGameDuration');
+                console.log("This is targetMap: ", await getItem('targetMap'))
 
-                  const result = await CreateGame(await getItem('lobbyName'), await getItem('targetMap'), gameDuration)
-        
-                  if (result.success) {
-                      console.log('Create Game JSON Data:', result.data);
-                      returnData = result.data;
-            
-                      await setItem('localGameID', returnData.gameId);
-                  } else {
-                      console.error('Error:', result.error)
-                      Alert.alert('Error', result.error)
-                      return;
-                  }
-                  } catch (error) {
-                    console.error("Error in create Lobby:", error);
+                const result = await CreateGame(await getItem('lobbyName'), await getItem('targetMap'), gameDuration)
+
+                if (result.success) {
+                    console.log('Create Game JSON Data:', result.data);
+                    returnData = result.data;
+
+                    await setItem('localGameID', returnData.gameId);
+                } else {
+                    console.error('Error:', result.error)
+                    Alert.alert('Error', result.error)
                     return;
-                  }
-        } 
-        console.log("Post create Game");
+                }
+            } catch (error) {
+                console.error("Error in create Lobby:", error);
+                return;
+            }
+        }
         try {
             const addResult = await AddPlayer(username, await getItem('localGameID'))
 
@@ -53,15 +53,15 @@ export default function UsernamePage() {
                 console.log('JSON Data:', addResult.data);
                 returnData = addResult.data;
                 console.log(returnData.gameId);
-      
+
                 await setItem('localPlayerId', returnData.playerId);
-                
+
                 router.navigate('/Lobby');
             } else {
                 console.error('Error:', addResult.error)
                 Alert.alert('Error', addResult.error)
                 return;
-            } 
+            }
         } catch (error) {
             console.error("Error in join lobby:", error);
             return;
@@ -74,14 +74,14 @@ export default function UsernamePage() {
         <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
             <Text style={styles.userText}>Enter Your username:</Text>
             <TouchableOpacity onPress={() => InitLobby(text)} style={styles.submitButton}>
-            <Text style={styles.submitButtonText}>Submit</Text>
+                <Text style={styles.submitButtonText}>Submit</Text>
             </TouchableOpacity>
             <TextInput
-            style={styles.textBox}
-            placeholder=""
-            value={text}
-            onChangeText={(newText) => setText(newText)}/>
-            <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={styles.text2}>{"<--------"}</Text></TouchableOpacity>
+                style={styles.textBox}
+                placeholder=""
+                value={text}
+                onChangeText={(newText) => setText(newText)} />
+            <TouchableOpacity style={styles.backButton} onPress={goBack}><Text style={styles.text2}>{"<--------"}</Text></TouchableOpacity>
         </View>
     )
 }
@@ -91,17 +91,17 @@ const styles = StyleSheet.create({
     text2: {
         margin: 'auto',
         fontWeight: 'bold',
-      },
+    },
     backButton: {
-      backgroundColor: '#9977ff',
-      borderRadius: 5,
-      marginVertical: 20,
-      marginHorizontal: 20,
-      width: 100,
-      height: 40,
-      position: 'absolute',
-      top: 30,
-      left: 20,
+        backgroundColor: '#9977ff',
+        borderRadius: 5,
+        marginVertical: 20,
+        marginHorizontal: 20,
+        width: 100,
+        height: 40,
+        position: 'absolute',
+        top: 30,
+        left: 20,
     },
     container: {
         backgroundColor: 'black',
@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
         marginBottom: 150,
         marginTop: 290,
     },
-    
+
     submitButtonText: {
         fontSize: 30,
         marginTop: 20,

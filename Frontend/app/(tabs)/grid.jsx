@@ -23,35 +23,37 @@ const textColourMapping = {
 
 // Importable component that formats the movement history of Dr X into boxes to be displayed within a container
 const Grid = ({ fetchDrXMoveHis, boxesData }) => {
-  
-    const renderBoxes = () => {
-      return boxesData.map((box, index) => {
-  
-        const backgroundColor = box.ticket
+
+  const renderBoxes = () => {
+    // Loops through the given boxes, which are the move history containers, and iterates so that they are then returned to fill the move history container
+    return boxesData.map((box, index) => {
+
+      const backgroundColor = box.ticket
         ? colourMapping[box.ticket] || "orange"
         : "gray";
 
-        const textColour = box.ticket
+      const textColour = box.ticket
         ? textColourMapping[box.ticket] || "black"
         : "black";
 
-        return (
-          <TouchableOpacity
-            key={box.round}
-            style={[styles.box, { backgroundColor }]}
-          >
-            <Text style={[styles.boxText, {color: textColour}]}>{box.round}</Text>
-            {box.text ? <Text style={[styles.boxText, {color: textColour}]}>{box.text}</Text> : null}
-          </TouchableOpacity>
-        );
-      });
-    };
-  
-    return (
+      return (
+        <TouchableOpacity
+          key={box.round}
+          style={[styles.box, { backgroundColor }]}
+        >
+          <Text style={[styles.boxText, { color: textColour }]}>{box.round}</Text>
+          {box.text ? <Text style={[styles.boxText, { color: textColour }]}>{box.text}</Text> : null}
+        </TouchableOpacity>
+      );
+    });
+  };
+
+  return (
     <View style={styles.gridContainer}>
       {renderBoxes()}
     </View>
-    )}
+  )
+}
 
 Grid.propTypes = {
   fetchDrXMoveHis: PropTypes.func,
@@ -61,14 +63,14 @@ Grid.propTypes = {
 const styles = StyleSheet.create({
   gridContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',  
-    justifyContent: 'space-between',  
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     flex: 1,  // Allow it to resize properly
     width: '100%',
     height: '100%',
   },
   box: {
-    width: '30%',  
+    width: '30%',
     flexGrow: 1,
     aspectRatio: 1,
     height: 'fill',

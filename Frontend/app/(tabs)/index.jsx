@@ -3,7 +3,7 @@ import React from 'react'
 import { Link } from 'expo-router'
 import { Image } from 'react-native';
 
-
+// Default home page. It loads differently based on whether your on mobile or website. 
 export default function index() {
   return (
     <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
@@ -32,20 +32,20 @@ export default function index() {
           </Link>
         </View>) : (
         <View style={styles.buttonsContainer}>
-        <Link href="/lobby_spectate_page" style={styles.button}>
-          <Text style={styles.buttonText}>Spectate Game</Text>
-        </Link>
-        {/* For Testing */}
-        <Link href="/lobby_code_page" style={styles.button}>
-          <Text style={styles.buttonText}>Join Game</Text>
-        </Link>
+          <Link href="/lobby_spectate_page" style={styles.button}>
+            <Text style={styles.buttonText}>Spectate Game</Text>
+          </Link>
+          {/* For Testing */}
+          <Link href="/lobby_code_page" style={styles.button}>
+            <Text style={styles.buttonText}>Join Game</Text>
+          </Link>
         </View>
       )}
     </View>
   )
 }
 
-  
+
 
 
 
@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     borderRadius: 10,
     marginVertical: 10, // Add space between buttons
-    
+
   },
   buttonText: {
     color: 'black',
@@ -78,5 +78,5 @@ const styles = StyleSheet.create({
     length: '500px',
     width: '200px',
   },
-  
+
 })

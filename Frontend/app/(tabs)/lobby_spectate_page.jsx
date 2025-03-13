@@ -1,57 +1,63 @@
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Platform } from 'react-native'
 import { useRouter, Link } from "expo-router";
 import React, { useState } from 'react';
-import { setItem, clear } from '../../utils/AsyncStorage'; 
+import { setItem, clear } from '../../utils/AsyncStorage';
+import { GetGameState } from '../../utils/API Functions/CheckGameState';
 
 export default function LobbyCodePage() {
   const router = useRouter(); // Get router instance
   const [text, setText] = useState('');
 
+  // Function used to return back to index/home
   const goBack = async () => {
-    await close()
+    await clear()
     router.navigate('/')
-    clear()
   }
 
-  const saveLobbyID = async (lobbyID) => {
-      if (lobbyID === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
-        Alert.alert('Error', 'Input Lobby Code');
-      } else if (lobbyID != null || lobbyID != undefined) {        
-        try {
-          let parsedLobbyID = parseInt(lobbyID)
-          if (!isNaN(parsedLobbyID) && lobbyID === '' + parsedLobbyID) {
-            await setItem('localGameID', parseInt(lobbyID))
-            router.navigate('/Lobby');
-          } else {
-            if (Platform.OS == 'android' || Platform.OS == 'ios') {
-              Alert.alert('Error', 'Input Integer');
-            } else {
-              console.log("Error, input Integer");
-            }
+  // Function for navigating to the lobby, using some checks to ensure that its a valid lobby ID
+  const navigateToLobby = async (lobbyID) => {
+    if (lobbyID === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
+      Alert.alert('Error', 'Input Lobby Code');
+    } else if (lobbyID != null || lobbyID != undefined) {
+      try {
+        let parsedLobbyID = parseInt(lobbyID)
+        if (!isNaN(parsedLobbyID) && lobbyID === '' + parsedLobbyID) {
+          const checkLobby = await GetGameState(lobbyID)
+          if (!checkLobby.success) {
+            Alert.alert('Error getting lobby, try again.')
+            console.log('Error getting lobby, try again.')
+            return
           }
-        } catch (error) {
-          if (lobbyID === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
-            Alert.alert('Error', 'Input Integer');
-          } else {
-            console.log("Error, input Integer");
-          }
+          await setItem('localGameID', parsedLobbyID)
+          router.navigate('/Lobby');
+        } else if (Platform.OS == 'android' || Platform.OS == 'ios') {
+          Alert.alert('Error', 'Input Integer');
+        } else {
+          console.log("Error, input Integer");
         }
-      };
-    }
-  
+      } catch (error) {
+        if (lobbyID === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
+          Alert.alert('Error', 'Input Integer');
+        } else {
+          console.log("Error, input Integer");
+        }
+      }
+    };
+  }
+
   return (
-    
+
     <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
       <Text style={styles.lobbyText}>Enter Lobby ID Here:</Text>
-      <Link onPress={() => saveLobbyID(text)} style={styles.JoinButton}>
-      <Text style={styles.joinButtonText}>Join Game</Text>
-      </Link>
-    <TextInput
-      style={styles.textBox}
-      placeholder=""
-      value={text}
-      onChangeText={(newText) => setText(newText)}/>
-      <TouchableOpacity style={styles.backButton}onPress={goBack}><Text style={styles.text2}>{"<--------"}</Text></TouchableOpacity>
+      <TouchableOpacity onPress={() => navigateToLobby(text)} style={styles.JoinButton}>
+        <Text style={styles.joinButtonText}>Join Game</Text>
+      </TouchableOpacity>
+      <TextInput
+        style={styles.textBox}
+        placeholder=""
+        value={text}
+        onChangeText={(newText) => setText(newText)} />
+      <TouchableOpacity style={styles.backButton} onPress={goBack}><Text style={styles.text2}>{"<--------"}</Text></TouchableOpacity>
     </View>
   );
 }
@@ -83,7 +89,7 @@ const styles = StyleSheet.create({
     width: 210,
     height: 150,
     borderRadius: 50,
-    
+
   },
   joinButtonText: {
     fontSize: 26,
