@@ -10,7 +10,7 @@ import Animated, {
 import { useRouter } from "expo-router";
 import { GetMapData } from '../../utils/API Functions/GetMapData';
 import { GetGameState } from '../../utils/API Functions/CheckGameState';
-import { getItem } from '../../utils/AsyncStorage';
+import { getItem, clear } from '../../utils/AsyncStorage';
 import { GetPlayerMoveHistory } from '../../utils/API Functions/GetPlayerMoveHistory';
 import Grid from './grid';
 

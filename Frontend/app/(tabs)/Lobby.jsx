@@ -38,12 +38,16 @@ const ComponentContainer = () => {
   }
 
   // Polling system to check whether the game has started, to then navigate to the game page. Otherwise  gets data about the players in the game to load on the page
+  // Issue with unmounting, still need to investigate
   useEffect(() => {
+    let isMounted = true;
+    
     const intervalId = setInterval(async () => {
+      if (!isMounted) return; // Prevent running after unmount
       try {
         const localGameID = await getItem('localGameID')
         const result = await GetGameState(localGameID);
-        if (result.success) {
+        if (result.success && isMounted) {
           setLobbyData(result.data);
           if (result.data.state !== "Open" && result.data.state !== undefined) {
             if (Platform.OS !== "web") {
@@ -68,12 +72,15 @@ const ComponentContainer = () => {
           console.error('Error:', result.error);
         }
       } catch (error) {
-        console.error('Fetch error:', error);
+        if (isMounted) console.log('Fetch error:', error);
       }
     }, 5000);
 
-    return () => clearInterval(intervalId)
-  }, []);
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId)
+    }
+  }, [router]);
 
   useEffect(() => {
     const data = async () => {

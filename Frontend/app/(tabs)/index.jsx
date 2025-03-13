@@ -29,10 +29,6 @@ export default function index() {
           <Link href="/lobby_spectate_page" style={styles.button}>
             <Text style={styles.buttonText}>Spectate Game</Text>
           </Link>
-          {/* For Testing */}
-          <Link href="/lobby_code_page" style={styles.button}>
-            <Text style={styles.buttonText}>Join Game</Text>
-          </Link>
         </View>
       )}
     </View>

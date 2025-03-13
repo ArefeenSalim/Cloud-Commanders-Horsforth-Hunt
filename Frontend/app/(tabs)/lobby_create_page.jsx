@@ -8,7 +8,8 @@ export default function LobbyCodePage() {
   const router = useRouter(); // Get router instance
   const [text, setText] = useState('');
   const [gameDuration, setGameDuration] = useState('short')
-  const [maps, setMaps] = useState(null);
+  const [mapFlag, setMapFlag] = useState(null);
+  const [maps, setMaps] = useState(false);
 
   // Hook call to begin loading the maps from the database
   useEffect(() => {
@@ -24,6 +25,7 @@ export default function LobbyCodePage() {
     try {
       // Save selected map data to AsyncStorage
       await setItem('targetMap', JSON.stringify(map.mapId));
+      setMapFlag(true);
     } catch (error) {
       console.error('Error saving selected map:', error);
     }
@@ -61,7 +63,10 @@ export default function LobbyCodePage() {
     console.log("Become Host Triggered")
     if (lobbyName === "" && (Platform.OS == 'android' || Platform.OS == 'ios')) {
       Alert.alert('Error', 'Input Lobby Code');
-    } else if (lobbyName != null || lobbyName != undefined) {
+    } else if (!mapFlag) {
+      Alert.alert('Need to select a map.')
+    }
+    else if (lobbyName != null || lobbyName != undefined) {
       await setItem('lobbyName', lobbyName)
       await setItem('isHost', true);
       await setItem('localGameDuration', gameDuration);
