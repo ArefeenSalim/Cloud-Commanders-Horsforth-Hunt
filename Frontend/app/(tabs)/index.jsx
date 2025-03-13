@@ -24,12 +24,6 @@ export default function index() {
           <Link href="/lobby_create_page" style={styles.button}>
             <Text style={styles.buttonText}>Create Game</Text>
           </Link>
-          <Link href="/game_page" style={styles.button}>
-            <Text style={styles.buttonText}>Load Game (TESTING)</Text>
-          </Link>
-          <Link href="/map" style={styles.button}>
-            <Text style={styles.buttonText}>Map page (TESTING)</Text>
-          </Link>
         </View>) : (
         <View style={styles.buttonsContainer}>
           <Link href="/lobby_spectate_page" style={styles.button}>

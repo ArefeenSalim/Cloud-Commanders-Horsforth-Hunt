@@ -2,7 +2,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Alert, Plat
 import { useRouter, Link } from "expo-router";
 import React, { useState, useEffect } from 'react';
 import { getMaps } from '../../utils/API Functions/GetMap'
-import { setItem, getItem, clear } from '../../utils/AsyncStorage'
+import { setItem, clear } from '../../utils/AsyncStorage'
 
 export default function LobbyCodePage() {
   const router = useRouter(); // Get router instance
@@ -73,7 +73,7 @@ export default function LobbyCodePage() {
   return (
 
     <View style={{ flex: 1, justifyContent: "center", backgroundColor: 'black', alignItems: "center" }}>
-      <View style={{ marginBottom: 10 }}>
+      <View style={{ marginBottom: 10, marginTop: 50 }}>
         <Text style={styles.lobbyText}>Enter Lobby Name Here:</Text>
         <TextInput
           style={styles.textBox}
@@ -116,13 +116,13 @@ const styles = StyleSheet.create({
   backButton: {
     backgroundColor: '#9977ff',
     borderRadius: 5,
-    marginVertical: 20,
-    marginHorizontal: 20,
+
+
     width: 100,
     height: 40,
     position: 'absolute',
-    top: 30,
-    left: 20,
+    top: 10,
+    left: 10,
   },
   text2: {
     margin: 'auto',

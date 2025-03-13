@@ -208,7 +208,7 @@ const MapViewer = () => {
             }
           }
 
-          const defaultOffset = { x: 0, y: -40 }
+          const defaultOffset = { x: 0, y: -120 }
 
 
           // Maps the offset onto the player object so they can be positioned onto the map relative to the location
@@ -381,11 +381,16 @@ const MapViewer = () => {
     });
   // Returning back to original scale/x-y view
   const resetPosition = () => {
+    start.value = {
+      x: 0,
+      y: 0,
+    };
     offset.value = {
       x: 0,
       y: 0,
     };
     scale.value = 1;
+    savedScale.value = 1;
   }
 
   // Combine gestures so they can be used 
@@ -432,10 +437,6 @@ const MapViewer = () => {
             <TouchableOpacity style={styles.ticketsButton} onPress={handlePress2}>
               <Text style={styles.overlayButtonText}>Tickets</Text>
             </TouchableOpacity>
-          </View>
-
-          <View style={styles.backToHome}>
-            <TouchableOpacity style={styles.backButton} onPress={goBack}><Text style={styles.text2}>{"<--------"}</Text></TouchableOpacity>
           </View>
 
           {/* Dr X Modal (Grey Pop-up) */}
@@ -559,13 +560,12 @@ const styles = StyleSheet.create({
   backButton: {
     backgroundColor: '#9977ff',
     borderRadius: 5,
-    marginVertical: 20,
-    marginHorizontal: 20,
-    width: 100,
+    width: 80,
     height: 40,
     position: 'absolute',
-    top: 30,
-    left: 20,
+    top: 10,
+    left: 10,
+    zIndex: 10,
   },
   container: {
     flex: 1,
@@ -598,9 +598,9 @@ const styles = StyleSheet.create({
     fontSize: 30
   },
   circle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "red",
     borderWidth: 1,
     borderColor: 'black',

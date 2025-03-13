@@ -25,7 +25,7 @@ const MapViewer = () => {
   const [gameLength, setGameLength] = useState(null);
   const [mapID, setMapID] = useState(null);
   const router = useRouter(); // Get router instance
-  const scale = useSharedValue(1);
+  const scale = useSharedValue(2);
   const savedScale = useSharedValue(1);
   const offset = useSharedValue({ x: 0, y: 0 });
   const start = useSharedValue({ x: 0, y: 0 });
@@ -41,9 +41,9 @@ const MapViewer = () => {
     const handleWheel = (event) => {
       const zoomSpeed = 0.1;
       if (event.deltaY < 0) {
-        scale.value = Math.min(scale.value + zoomSpeed, 3); // Max zoom limit
+        scale.value = Math.min(scale.value + zoomSpeed, 5);
       } else {
-        scale.value = Math.max(scale.value - zoomSpeed, 0.5); // Min zoom limit
+        scale.value = Math.max(scale.value - zoomSpeed, 0.1);
       }
     };
 
@@ -132,7 +132,7 @@ const MapViewer = () => {
             }
           }
 
-          const defaultOffset = { x: 0, y: -40 }
+          const defaultOffset = { x: 0, y: -100 }
 
 
           // Maps the offset onto the player object so they can be positioned onto the map relative to the location
@@ -260,11 +260,16 @@ const MapViewer = () => {
     });
   // Returning back to original scale/x-y view
   const resetPosition = () => {
+    start.value = {
+      x: 0,
+      y: 0,
+    };
     offset.value = {
       x: 0,
       y: 0,
     };
     scale.value = 1;
+    savedScale.value = 1;
   }
 
 
@@ -320,7 +325,7 @@ const MapViewer = () => {
                 width: mapData.mapWidth,
                 height: mapData.mapHeight,
               }}
-              resizeMode="contain"
+              resizeMode="cover"
             />
 
             {/* Map Locations */}
@@ -431,9 +436,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   circle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "red",
     borderWidth: 1,
     borderColor: 'black',

@@ -83,7 +83,8 @@ const ComponentContainer = () => {
           const settingData = playerLobbyData.map(playerInfo => ({
             title: playerInfo.playerName,
             content: playerInfo.colour,
-            playerId: playerInfo.playerId
+            playerId: playerInfo.playerId,
+            location: playerInfo.location,
           }))
           setComponentsData(settingData);
         } else {
@@ -116,13 +117,13 @@ const ComponentContainer = () => {
           <View style={styles.view}>
             <View style={styles.h2}>
               {componentsData.map((data) => (
-                <View style={[styles.section, { borderColor: data.content.toLowerCase() === "clear" ? "grey" : data.content.toLowerCase() }]} key={data.playerId}>
+                <View style={[styles.section, { borderColor: data.content.toLowerCase() === "clear" ? "purple" : data.content.toLowerCase() }]} key={data.playerId}>
                   <Text style={styles.titles}>Player</Text>
                   <Text style={styles.text}>{data.title}</Text>
                   <Text style={styles.titles}>Colour</Text>
                   <Text style={styles.text}>{data.content}</Text>
-                  <Text style={styles.titles}>Player ID</Text>
-                  <Text style={styles.text}>{data.playerId}</Text>
+                  <Text style={styles.titles}>Start Location</Text>
+                  <Text style={styles.text}>{data.location}</Text>
                 </View>
               ))}
 
